@@ -6,22 +6,22 @@
        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
   <!-- Bean implementing edu.uw.ext.framework.account.AccountFactory -->
-  <bean id="AccountFactory" class="your.AccountFactory.impl.class"/>
+  <bean id=“AccountFactory” class=“edu.uw.nan.AccountFactoryLaplace” />
 
   <!-- Bean implementing edu.uw.ext.framework.account.Address -->
-  <bean id="Address" class="your.Address.impl.class" scope="prototype"/>
+  <bean id="Address" class="edu.uw.nan.AddressLaplace” scope="prototype" />
 
   <!-- Bean implementing edu.uw.ext.framework.account.CreditCard -->
-  <bean id="CreditCard" class="your.CreditCard.impl.class" scope="prototype"/>
+  <bean id="CreditCard" class="edu.uw.nan.CreditCardLaplace” scope="prototype" />
 
   <!-- Bean implementing edu.uw.ext.framework.account.Account -->
-  <bean id="Account" class="your.Account.impl.class" scope="prototype"/>
+  <bean id="Account" class="edu.uw.nan.AccountLaplace” scope="prototype" />
 
   <!-- Bean implementing edu.uw.ext.framework.account.AccountManagerFactory -->
-  <bean id="AccountManagerFactory" class="your.AccountManagerFactory.impl.class"/>
+  <bean id="AccountManagerFactory" class="edu.uw.nan.AccountManagerFactoryLaplace” />
 
   <!-- Bean providing RDBMS implementation of edu.uw.ext.framework.account.DaoFactory -->
-  <bean id="DaoFactory" class="your.DaoFactory.impl.class"/>
+  <bean id="DaoFactory" class="edu.uw.nan.AccountDaoFactoryLaplace” />
   
 </beans>
 
