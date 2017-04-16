@@ -10,8 +10,20 @@ import edu.uw.ext.framework.account.Account;
 import edu.uw.ext.framework.account.AccountException;
 import edu.uw.ext.framework.account.AccountFactory;
 
+/**
+ * @author Neil Nevitt
+ * Factory for creation of accounts.
+ */
 public class AccountFactoryLaplace implements AccountFactory {
 	private final Logger logger = LoggerFactory.getLogger(AccountFactoryLaplace.class);
+	
+	/**
+	* Instantiates a new account instance.
+	* @param accountName - the account name.
+	* @param hashedPassword - the password hash
+	* @param initialBalance - the balance.
+	* @return Returns the newly instantiated account, or null if unable to instantiate the account.
+	*/
 	@Override
 	public Account newAccount(String accountName, byte[] hashPassword, int intBalance) {
 		Preferences perfs = Preferences.systemNodeForPackage(edu.uw.ext.framework.account.Account.class);

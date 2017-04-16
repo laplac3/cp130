@@ -1,10 +1,13 @@
 package edu.uw.nan.dao;
 
 import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintStream;
 
 import org.slf4j.Logger;
@@ -45,7 +48,7 @@ public class AccountDaoLaplace implements AccountDao {
 	public static final String CREDIT_CARD = "creditCard";
 	public static final String ACCOUNT_NAME = "accountName";
 	
-	public static final String OUTPUT_FILE_NAME = "%s/%s.zip";
+	public static final String OUTPUT_FILE_NAME = "%s/%s.txt";
 	public static final String APPLICATION_CONTEXT_FILE_NAME = "context.xml";
 	
 	public AccountDaoLaplace() {
@@ -60,44 +63,90 @@ public class AccountDaoLaplace implements AccountDao {
 	}
 
 	@Override
-	public void deleteAccount(String arg0) throws AccountException {
-		// TODO Auto-generated method stub
+	public void deleteAccount(String accountName ) throws AccountException {
+		File f = new File(String.format(OUTPUT_FILE_NAME, ACCOUNTS_FOLDER, accountName) );
+		if (f.exists() ) {
+			f.delete();
+		} else {
+			logger.info("Unable to delete account "+ accountName);
+			throw new AccountException( "Unable to delete account "+ accountName);
+		} 
 
 	}
 
 	@Override
 	public Account getAccount(String accountName) {
-		BeanFactory bean = new FileSystemXmlApplicationContext(APPLICATION_CONTEXT_FILE_NAME);
-		Account account = null;
-		
-		File file = new File(String.format(OUTPUT_FILE_NAME, ACCOUNTS_FOLDER, accountName ));
-		if ( file.exists() ) {
-			account = bean.getBean(Account.class);
-			try {
-				FileInputStream fis = new FileInputStream(file);
-				DataInputStream din = new DataInputStream(fis);
-				din.readUTF();
-				
-				}
-				
-		
-				
-			
-		}
+//		BeanFactory bean = new FileSystemXmlApplicationContext(APPLICATION_CONTEXT_FILE_NAME);
+//		Account account = null;
+//		
+//		File file = new File(String.format(OUTPUT_FILE_NAME, ACCOUNTS_FOLDER, accountName ));
+//		if ( file.exists() ) {
+//			account = bean.getBean(Account.class);
+//			try {
+//				FileInputStream fis = new FileInputStream(file);
+//				DataInputStream din = new DataInputStream(fis);
+//				din.readUTF();
+//				
+//				}
+//				
+//		
+//				
+//			
+//		}
 		return null;
 	}
 
 	@Override
 	public void reset() throws AccountException {
-		// TODO Auto-generated method stub
+		File dir = new File(ACCOUNTS_FOLDER);
+		if ( dir.exists() && dir.isDirectory() ) {
+			for ( File f : dir.listFiles() ) {
+				f.delete();
+			}
+			dir.delete();
+		}
 
 	}
 
 	@Override
 	public void setAccount(Account account) throws AccountException {
 		
-
-
+//		try {
+//			FileOutputStream fos = new FileOutputStream(String.format(OUTPUT_FILE_NAME, account.getName()));
+//			
+//		}
+//
+//	}
+//	
+//	private void addEntry( DataOutputStream data, String name, String Value) throws IOException {
+		
+		
+	}
+	
+	private static void write( final OutputStream out, final Account account ) throws AccountException {
+		try { 
+			final DataOutputStream dos = new DataOutputStream(out);
+			dos.writeUTF(account.getName());
+			dos.writeInt(account.getBalance());
+			dos.writeUTF(account.getFullName());
+			dos.writeUTF(account.getPhone());
+			dos.writeUTF(account.getEmail());
+			writeByteArray(dos,account.getPasswordHash());
+			
+		} catch ( IOException e) {
+			
+		}
+	}
+	
+	private static void writeByteArray( DataOutputStream out, final byte[] bytes ) {
+		final int length = bytes == null ? -1 : bytes.length;
+		for ( int i = 0; i< length; i++ ) {
+			try {
+				out.writeByte(bytes[i]);
+			} catch ( IOException e ) {
+				logger.info("Unable to write hash", e);
+			}
+		}
 	}
 
 }
