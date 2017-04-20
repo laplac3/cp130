@@ -2,10 +2,15 @@ package edu.uw.nan.account;
 
 import edu.uw.ext.framework.account.Address;
 
-@SuppressWarnings("serial")
+
 public class AddressLaplace implements Address {
 
 
+	/**
+	 * Version Id.
+	 */
+	private static final long serialVersionUID = 6841030734859962365L;
+	
 	/**
 	 * Street address.
 	 */
@@ -22,6 +27,10 @@ public class AddressLaplace implements Address {
 	 * The zip code.
 	 */
 	private String zipCode;
+	
+	// simple constructor
+	
+	
 	/**
 	 * Gets the city.
 	 * @return the city.
@@ -60,7 +69,7 @@ public class AddressLaplace implements Address {
 	 */
 	@Override
 	public void setCity(final String city) {
-		this.city = city == null ? "" : city;
+		this.city = city;
 	}
 	/**
 	 * Sets the state.
@@ -68,7 +77,7 @@ public class AddressLaplace implements Address {
 	 */
 	@Override
 	public void setState(final String state) {
-		this.state = state == null ? "" : state;
+		this.state =state;
 		
 	}
 	/**
@@ -77,7 +86,7 @@ public class AddressLaplace implements Address {
 	 */
 	@Override
 	public void setStreetAddress(final String streetAddress) {
-		this.streetAddress = streetAddress == null ? "" : streetAddress;
+		this.streetAddress = streetAddress;
 		
 	}
 	/**
@@ -86,8 +95,12 @@ public class AddressLaplace implements Address {
 	 */
 	@Override
 	public void setZipCode(String zipCode) {
-		this.zipCode = zipCode == null ? "" : zipCode;
+		this.zipCode =zipCode;
 		
+	}
+	
+	public String toString() {
+		return String.format("%s, %s, %s, %s", this.city, this.state, this.streetAddress, this.zipCode);
 	}
 	
 }

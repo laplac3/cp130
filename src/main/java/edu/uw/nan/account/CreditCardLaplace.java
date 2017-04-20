@@ -6,8 +6,13 @@ import edu.uw.ext.framework.account.CreditCard;
  * @author Neil Nevitt
  * A pure JavaBean implementation of a credit card.
  */
-@SuppressWarnings("serial")
+
 public class CreditCardLaplace implements CreditCard {
+
+	/**
+	 * Version Id.
+	 */
+	private static final long serialVersionUID = 1980405198903931349L;
 
 	/**
 	 * Account number.
@@ -29,6 +34,13 @@ public class CreditCardLaplace implements CreditCard {
 	 * The type of card.
 	 */
 	private String type;
+
+	/**
+	 * Constructor.  
+	 */
+	public CreditCardLaplace() {
+		
+	}
 	
 	/**
 	 * Gets the account number.
@@ -76,7 +88,7 @@ public class CreditCardLaplace implements CreditCard {
 	 */
 	@Override
 	public void setAccountNumber(String accountNumber ) {
-		this.accountNumber = accountNumber == null ? "" : accountNumber;
+		this.accountNumber = accountNumber;
 		
 	}
 	/**
@@ -85,7 +97,7 @@ public class CreditCardLaplace implements CreditCard {
 	 */
 	@Override
 	public void setExpirationDate(String expirationDate) {
-		this.expirationDate = expirationDate == null ? "" : expirationDate;
+		this.expirationDate = expirationDate;
 	}
 	/**
 	 * Sets the holder.
@@ -93,7 +105,7 @@ public class CreditCardLaplace implements CreditCard {
 	 */
 	@Override
 	public void setHolder(String holder) {
-		this.holder = holder == null ? "" : holder;
+		this.holder = holder;
 	}
 	/**
 	 * Sets the issuer.
@@ -101,7 +113,7 @@ public class CreditCardLaplace implements CreditCard {
 	 */
 	@Override
 	public void setIssuer(String issuer) {
-		this.issuer = issuer == null ? "" : issuer;
+		this.issuer = issuer;
 	}
 	/**
 	 * Sets the type.
@@ -109,7 +121,12 @@ public class CreditCardLaplace implements CreditCard {
 	 */
 	@Override
 	public void setType(String type) {
-		this.type = type == null ? "" : type;
+		this.type = type;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("%s, %s, %s, %s, %s", this.accountNumber, this.expirationDate, this.holder, this.issuer, this.type);
 	}
 
 }

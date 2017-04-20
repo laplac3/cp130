@@ -1,6 +1,5 @@
 package edu.uw.nan.account;
 
-import java.util.prefs.Preferences;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,8 +11,13 @@ import edu.uw.ext.framework.order.Order;
  * @author Neil Nevit
  * A pure JavaBean representation of an account.
  */
-@SuppressWarnings("serial")
+
 public class AccountLaplace implements Account {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6344839918545176698L;
 
 	private final Logger logger = LoggerFactory.getLogger(AccountLaplace.class);
 	/**
@@ -23,7 +27,7 @@ public class AccountLaplace implements Account {
 	/**
 	 * Account balance.
 	 */
-	private int balance;
+	private int balance = Integer.MIN_VALUE;
 	/**
 	 * Full name of account holder.
 	 */
@@ -51,13 +55,28 @@ public class AccountLaplace implements Account {
 	/**
 	 * Account Manager.
 	 */
-	private AccountManager accountManager = null;
-	
+	private transient AccountManager accountManager = null;
+	private static final int MIN_NAME_LENGTH = 8;
+	private static final int MIN_ACCOUNT_BALANCE = 100_000;
 	/**
 	 * Account constructor.
 	 */
 	public AccountLaplace(){
 		
+	}
+	
+	public AccountLaplace(final String acctName, final byte[] passwordHash, final int balance) throws AccountException {
+
+
+		if ( balance < MIN_ACCOUNT_BALANCE ) {
+			final String msg = String.format("Account creation failed for %s , due to balance of %d ", acctName, balance );
+			logger.warn(msg);
+			throw new AccountException(msg);
+		}
+		setName(acctName);
+		setPasswordHash(passwordHash);
+		this.balance = balance;
+
 	}
 	/**
 	 * Get the account name.
@@ -71,9 +90,11 @@ public class AccountLaplace implements Account {
 	 * @param acctName - the value to be set for the account name
 	 */
 	public void setName(final String acctName) throws AccountException {
-		Preferences perfs = Preferences.userNodeForPackage(Account.class);
-		if ( acctName.length() < perfs.getInt("minLength", 8)) {
-			throw new AccountException("Account name is to short, " + acctName );
+		
+		if ( acctName == null || acctName.length() < MIN_NAME_LENGTH ) {
+			final String msg = String.format("Account name %s is unacceptable." + acctName );
+			logger.warn(msg);
+			throw new AccountException(msg);
 		}
 		this.acctName = acctName;
 	}
@@ -88,11 +109,9 @@ public class AccountLaplace implements Account {
 	 * Sets the account balance.
 	 * @param balance - the value to set the balance to in cents
 	 */
-	public void setBalance(int balance) {
-		Preferences perfs = Preferences.userNodeForPackage(Account.class);
-		if ( balance < perfs.getInt("minAccountBalance", 0)) {
-			
-		}
+	public void setBalance(final int balance) {
+		
+
 		this.balance = balance;
 	}
 	/**
@@ -171,14 +190,24 @@ public class AccountLaplace implements Account {
 	 * @return the hashed password.
 	 */
 	public byte[] getPasswordHash() {
-		return passwordHash;
+		byte[] copy = null;
+		if( passwordHash != null ) {
+			copy = new byte[passwordHash.length];
+			System.arraycopy(passwordHash, 0, copy, 0, passwordHash.length); // Defensive copy so that the original is unchanged. 
+		}
+		return copy;  //look at russ's
 	}
 	/**
 	 * Sets the hashed password.
 	 * @param passwordHash - the value to be st for the password hash
 	 */
 	public void setPasswordHash(byte[] passwordHash) {
-		this.passwordHash = passwordHash;
+		byte[] copy = null;
+		if( passwordHash != null ) {
+			copy = new byte[passwordHash.length];
+			System.arraycopy(passwordHash, 0, copy, 0, passwordHash.length); 
+		}
+		this.passwordHash = copy; //same thing as password hash.
 	}
 	/**
 	 * Getter for account manager.
@@ -208,11 +237,15 @@ public class AccountLaplace implements Account {
 	 * @param executionPrice - the price the order was executed at
 	 */
 	@Override
-	public void reflectOrder(Order order, int executionPrice) {
-		if ( order.isBuyOrder()) {
-			balance -= order.valueOfOrder(executionPrice);
-		} else {
+	public void reflectOrder(Order order, int executionPrice) {  // look at russ's
+		try {
 			balance += order.valueOfOrder(executionPrice);
+			if (accountManager != null ) 
+				accountManager.persist(this);
+			else
+				logger.error("Account Manager has not ben initialized.", new Exception());
+		} catch ( final AccountException ex ) {
+			logger.error(String.format("Failed to persist assounct %s after adjusting the price.", acctName,ex));
 		}
 		
 	}

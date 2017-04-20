@@ -1,19 +1,22 @@
 package edu.uw.nan.account;
 
+import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import edu.uw.ext.framework.account.Account;
 import edu.uw.ext.framework.account.AccountException;
 import edu.uw.ext.framework.account.AccountFactory;
 import edu.uw.ext.framework.account.AccountManager;
 import edu.uw.ext.framework.dao.AccountDao;
-import edu.uw.nan.dao.AccountDaoLaplace;
-import edu.uw.nan.dao.DaoFactoryLaplace;
+
+
+import edu.uw.nan.dao.FileAccountDaoLaplace;
 
 /**
  * @author Neil Nevitt
@@ -22,14 +25,17 @@ import edu.uw.nan.dao.DaoFactoryLaplace;
 public class AccountManagerLaplace implements AccountManager {
 
 	private final Logger logger = LoggerFactory.getLogger(AccountManagerLaplace.class);
+	
+	private final String ENCODING = "ISO-8859-1";
+	private final String ALGORITHIM = "SHA1";
 	/**
 	 * The account factory.
 	 */
-	private final AccountFactory accountFactory;
+	private AccountFactory accountFactory;
 	/**
 	 * The data access object.
 	 */
-	private final AccountDao dao;
+	private AccountDao dao;
 	
 	/**
 	 * Constructor for the AccountManagerLaplace.
@@ -37,16 +43,14 @@ public class AccountManagerLaplace implements AccountManager {
 	 */
 	public AccountManagerLaplace(final AccountDao dao) {
 		this.dao = dao;
-		accountFactory = new AccountFactoryLaplace();
+		try ( ClassPathXmlApplicationContext appContext = new ClassPathXmlApplicationContext("context.xml")) {
+			accountFactory = appContext.getBean(AccountFactory.class);
+		} catch ( final BeansException e) {
+			logger.error("Unable to create account Manager", e);;
+		}
 	}
 	
-	/**
-	 * Constructor for the AccountManagerLaplace.
-	 */
-	public AccountManagerLaplace() {
-		this.dao = new AccountDaoLaplace();
-		accountFactory = new AccountFactoryLaplace();
-	}
+
 	/**
 	 * Release any resources used by the AccountManager implementation. Once closed further operations on the AccountManager may fail.
 	 * @throws AccountException - if error occurs accessing accounts.
@@ -54,7 +58,7 @@ public class AccountManagerLaplace implements AccountManager {
 	@Override
 	public void close() throws AccountException {
 		dao.close();
-		
+		dao = null;
 	}
 	/**
 	 * Creates an account. The creation process should include persisting the account and setting the account manager reference 
@@ -66,23 +70,34 @@ public class AccountManagerLaplace implements AccountManager {
 	 * @throws AccountException - if operation fails
 	 */
 	@Override
-	public Account createAccount(final String accountName, final String password, int balance) throws AccountException {
-		Account account = null;
-		account = dao.getAccount(accountName);
-		if ( account != null ) {
-			throw new AccountException(String.format("Account %s already exists", accountName));
-		} try {
-			MessageDigest mess = MessageDigest.getInstance("SHA1");
-			mess.update(password.getBytes());
-			
-			account= accountFactory.newAccount(accountName, mess.digest(), balance);
+	public synchronized Account createAccount(final String accountName, final String password, int balance) throws AccountException {
+		
+		if ( dao.getAccount(accountName) == null ) {
+			final byte[] passwordHash = hashPassword(password);
+			final Account account = accountFactory.newAccount(accountName, passwordHash, balance);
 			account.registerAccountManager(this);
-			dao.setAccount(account);
-		} catch (NoSuchAlgorithmException ex ) {
-			logger.error("Unable to create SHA1 hash for this password", ex);
+			persist(account);
+			return account;
+		} else {
+			throw new AccountException("aacount name already in use.");
 		}
-		return account;
 	}
+	
+	private byte[] hashPassword(String password) throws AccountException {
+		byte[] bytes = null;
+		try {
+			MessageDigest mess = MessageDigest.getInstance(ALGORITHIM);
+			mess.update(password.getBytes(ENCODING));
+			bytes = mess.digest();
+		} catch ( NoSuchAlgorithmException ex ) {
+			logger.warn("Unable to find Algorithm.", ex);
+			throw new AccountException("Unable to find Algorithm.",ex);
+		} catch (UnsupportedEncodingException e) {
+			throw new AccountException("Unable to find character encoding.",e);
+		}
+		return bytes;
+	}
+
 	/**
 	 * Remove the account.
 	 * @param accountName - the name of the account to remove
@@ -90,8 +105,10 @@ public class AccountManagerLaplace implements AccountManager {
 	 */
 	@Override
 	public void deleteAccount(final String accountName ) throws AccountException {
-		dao.deleteAccount(accountName);
-		
+		final Account account = dao.getAccount(accountName);
+		if ( account != null ) {
+			dao.deleteAccount(accountName);
+		}
 	}
 	/**
 	 * Lookup an account based on account name.
@@ -113,7 +130,7 @@ public class AccountManagerLaplace implements AccountManager {
 	 * @throws AccountException - if operation fails
 	 */
 	@Override
-	public void persist(final Account account) throws AccountException {
+	public synchronized  void persist(final Account account) throws AccountException {
 		dao.setAccount(account);
 		
 	}
@@ -126,20 +143,13 @@ public class AccountManagerLaplace implements AccountManager {
 	 */
 	@Override
 	public boolean validateLogin(final String accountName, final String password) throws AccountException {
-		boolean isPasswordMatch = false;
-		try {
-			MessageDigest mess = MessageDigest.getInstance("SHA1");
-			mess.update(password.getBytes());
-			
-			Account account = dao.getAccount(accountName);
-			if ( account != null ) {
-				isPasswordMatch = Arrays.equals(account.getPasswordHash(), mess.digest());
-			}
-		} catch ( NoSuchAlgorithmException ex ) {
-			logger.error("Unable to create a message digest for this password", ex);
-			throw new AccountException(ex.getMessage());
+		boolean valid = false;
+		final Account account = getAccount(accountName);
+		if (account != null ) {
+			final byte[] passwordHash = hashPassword(password);
+			valid = MessageDigest.isEqual(account.getPasswordHash(), passwordHash);
 		}
-		return isPasswordMatch;
+		return valid;
 	}
 
 }

@@ -1,5 +1,6 @@
 package edu.uw.nan.dao;
 
+import edu.uw.ext.framework.account.AccountException;
 import edu.uw.ext.framework.dao.AccountDao;
 import edu.uw.ext.framework.dao.DaoFactory;
 import edu.uw.ext.framework.dao.DaoFactoryException;
@@ -9,7 +10,7 @@ import edu.uw.ext.framework.dao.DaoFactoryException;
  * Creates DAO objects.
  *
  */
-public class DaoFactoryLaplace implements DaoFactory {
+public class FileDaoFactoryLaplace implements DaoFactory {
 	/**
 	 * Instantiates a new AccountDao object.
 	 * @return a newly instantiated account DAO object
@@ -18,8 +19,11 @@ public class DaoFactoryLaplace implements DaoFactory {
 	 */
 	@Override
 	public AccountDao getAccountDao() throws DaoFactoryException {
-		AccountDao accountDao = new AccountDaoLaplace();
-		return accountDao;
+		try {
+			return new FileAccountDaoLaplace();
+		} catch ( final AccountException e) {
+			throw new DaoFactoryException("Instantiation of FileAccountDao failed.", e);
+		}
 	}
 
 }
