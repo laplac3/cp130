@@ -54,20 +54,23 @@ public class FileAccountDaoLaplace implements AccountDao {
 				account = AccountSer.read(in);
 				in.close();
 				
+				
 				inFile = new File(accountDir, ADDRESS_FILENAME);
 				if (inFile.exists()) {
-				in = new FileInputStream(inFile);
-				final Address address = AddressSer.read(in);
-				in.close();
-				account.setAddress(address);
+					in = new FileInputStream(inFile);
+					final Address address = AddressSer.read(in);
+					in.close();
+					account.setAddress(address);
 				}
-				
+					
+
 				inFile = new File(accountDir, CREDITCARD_FILENAME);
 				if (inFile.exists()) {
-				in = new FileInputStream(inFile);
-				final CreditCard creditCard = CreditCardSer.read(in);
-				in.close();
-				account.setCreditCard(creditCard);
+					in = new FileInputStream(inFile);
+					final CreditCard creditCard = CreditCardSer.read(in);
+					in.close();
+					account.setCreditCard(creditCard);
+				
 				}
 				
 				} catch ( final IOException e ) {
@@ -149,16 +152,19 @@ public class FileAccountDaoLaplace implements AccountDao {
 		
 		
 	}
-	
+	 
 	private void deleteFile(final File file) {
 		if (file.exists()) {
-			final File[] files = file.listFiles();
-			for ( File f : files ) {
-				deleteFile(f);
+			if (file.isDirectory() ) {
+				final File[] files = file.listFiles();
+				for ( File f : files ) {
+					deleteFile(f);
+				}
+			
 			}
 		}
-		if (file.delete() ) {
-			logger.warn("File deletion failed %s.", file.getAbsoluteFile());
+		if (!file.delete() ) {
+			logger.warn("File deletion failed for " + file.getAbsolutePath());
 		}
 	}
 

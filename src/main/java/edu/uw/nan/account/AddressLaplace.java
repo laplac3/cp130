@@ -4,7 +4,7 @@ import edu.uw.ext.framework.account.Address;
 
 
 public class AddressLaplace implements Address {
-
+ 
 
 	/**
 	 * Version Id.

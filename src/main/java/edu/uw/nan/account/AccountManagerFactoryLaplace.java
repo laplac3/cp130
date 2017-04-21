@@ -8,7 +8,7 @@ import edu.uw.ext.framework.dao.AccountDao;
  * @author Neil Nevitt.
  * Creates account managers.
  *
- */
+ */ 
 public class AccountManagerFactoryLaplace implements AccountManagerFactory {
 	/**
 	 * Instantiates a new account manager instance.

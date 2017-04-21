@@ -92,7 +92,7 @@ public class AccountLaplace implements Account {
 	public void setName(final String acctName) throws AccountException {
 		
 		if ( acctName == null || acctName.length() < MIN_NAME_LENGTH ) {
-			final String msg = String.format("Account name %s is unacceptable." + acctName );
+			final String msg = String.format("Account name %s is unacceptable.", acctName );
 			logger.warn(msg);
 			throw new AccountException(msg);
 		}
@@ -222,7 +222,7 @@ public class AccountLaplace implements Account {
 	 * The account manager member should not be serialized with implementing class object.
 	 * 
 	 */
-	public void registerAccountManager(AccountManager m) {
+	public void registerAccountManager(final AccountManager m) {
 		if ( this.accountManager == null) {
 			this.accountManager = m;
 		} else {
@@ -248,7 +248,7 @@ public class AccountLaplace implements Account {
 			logger.error(String.format("Failed to persist assounct %s after adjusting the price.", acctName,ex));
 		}
 		
-	}
+	} 
 
 	
 	

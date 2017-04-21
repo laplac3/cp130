@@ -36,12 +36,12 @@ public final class AccountFactoryLaplace implements AccountFactory {
 			account = new AccountLaplace( accountName, hashPassword, intBalance);
 			if ( logger.isInfoEnabled() ) {
 				logger.info(String.format("Created account: %s with balance of %d.", accountName, intBalance));
-				return account;
+				
 			}
 		} catch (AccountException ex) {
-			final String msg = String.format("Account createion failed for %s due with balance of %d.", accountName, intBalance);
+			final String msg = String.format("Account createion failed for %s due to a balance of %d.", accountName, intBalance);
 			logger.warn(msg, ex);
-		}
+		} 
 		return account;
 	}
 

@@ -23,7 +23,7 @@ import edu.uw.nan.dao.FileAccountDaoLaplace;
  * Manages basic account operations; create, delete, authentication and persistence.
  */
 public class AccountManagerLaplace implements AccountManager {
-
+ 
 	private final Logger logger = LoggerFactory.getLogger(AccountManagerLaplace.class);
 	
 	private final String ENCODING = "ISO-8859-1";
@@ -79,7 +79,7 @@ public class AccountManagerLaplace implements AccountManager {
 			persist(account);
 			return account;
 		} else {
-			throw new AccountException("aacount name already in use.");
+			throw new AccountException("account name is already in use.");
 		}
 	}
 	

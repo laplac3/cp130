@@ -21,11 +21,6 @@ public class AccountSer {
 		
 	}
 	
-	public static Account read(FileInputStream in) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	public static void write(FileOutputStream out, Account account) throws AccountException {
 		try {
 			final DataOutputStream dos = new DataOutputStream(out);
@@ -39,7 +34,7 @@ public class AccountSer {
 		} catch (final IOException e ) {
 			throw new AccountException("Failed to write account data", e);
 		} 
-		
+		 
 	}
 	
 	public static Account read( final InputStream in ) throws AccountException {

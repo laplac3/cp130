@@ -28,7 +28,7 @@ public class CreditCardSer {
 			throw new AccountException("Unable to set address for account.", e);
 		}
 		
-	}
+	} 
 
 	public static void write(FileOutputStream out, CreditCard creditCard) throws AccountException {
 		

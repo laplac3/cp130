@@ -3,7 +3,7 @@ package edu.uw.nan.dao;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-
+ 
 
 public class SerUtil {
 	

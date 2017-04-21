@@ -30,7 +30,7 @@ public class AddressSer {
 		} catch (IOException e) {
 			throw new AccountException("Unable to set address for account.", e);
 		}
-		
+		 
 	}
 
 	public static void write(FileOutputStream out, Address address) throws AccountException {

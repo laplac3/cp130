@@ -127,6 +127,6 @@ public class CreditCardLaplace implements CreditCard {
 	@Override
 	public String toString() {
 		return String.format("%s, %s, %s, %s, %s", this.accountNumber, this.expirationDate, this.holder, this.issuer, this.type);
-	}
+	} 
 
 }
