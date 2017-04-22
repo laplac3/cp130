@@ -30,7 +30,7 @@ public class CreditCardSer {
 		
 	} 
 
-	public static void write(FileOutputStream out, CreditCard creditCard) throws AccountException {
+	public static void write( FileOutputStream out, CreditCard creditCard) throws AccountException {
 		
 		try {
 			final DataOutputStream dos = new DataOutputStream(out);
