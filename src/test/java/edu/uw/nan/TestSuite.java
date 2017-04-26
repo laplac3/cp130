@@ -8,6 +8,6 @@ import test.AccountTest;
 import test.DaoTest;
 
 @RunWith(Suite.class)
-@Suite.SuiteClasses({AccountTest.class, AccountManagerTest.class, DaoTest.class})
+@Suite.SuiteClasses({ AccountManagerTest.class, DaoTest.class})
 public class TestSuite{
 }
