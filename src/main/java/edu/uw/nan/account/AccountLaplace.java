@@ -55,7 +55,7 @@ public class AccountLaplace implements Account {
 	/**
 	 * Account Manager.
 	 */
-	private transient AccountManager accountManager = null;
+	private transient AccountManager accountManager;
 	private static final int MIN_NAME_LENGTH = 8;
 	private static final int MIN_ACCOUNT_BALANCE = 100_000;
 	/**

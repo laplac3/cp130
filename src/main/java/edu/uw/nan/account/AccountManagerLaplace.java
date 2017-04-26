@@ -84,18 +84,16 @@ public class AccountManagerLaplace implements AccountManager {
 	}
 	
 	private byte[] hashPassword(String password) throws AccountException {
-		byte[] bytes = null;
+		
 		try {
 			MessageDigest mess = MessageDigest.getInstance(ALGORITHIM);
 			mess.update(password.getBytes(ENCODING));
-			bytes = mess.digest();
-		} catch ( NoSuchAlgorithmException ex ) {
-			logger.warn("Unable to find Algorithm.", ex);
+			return mess.digest();
+		} catch ( final NoSuchAlgorithmException ex ) {
 			throw new AccountException("Unable to find Algorithm.",ex);
-		} catch (UnsupportedEncodingException e) {
-			throw new AccountException("Unable to find character encoding.",e);
+		} catch ( final UnsupportedEncodingException e) {
+			throw new AccountException(String.format("Unable to find character encoding.",ENCODING),e);
 		}
-		return bytes;
 	}
 
 	/**
@@ -104,7 +102,7 @@ public class AccountManagerLaplace implements AccountManager {
 	 * @throws AccountException - if operation fails
 	 */
 	@Override
-	public void deleteAccount(final String accountName ) throws AccountException {
+	public synchronized void deleteAccount(final String accountName ) throws AccountException {
 		final Account account = dao.getAccount(accountName);
 		if ( account != null ) {
 			dao.deleteAccount(accountName);
@@ -117,7 +115,7 @@ public class AccountManagerLaplace implements AccountManager {
 	 * @throws AccountException - if operation fails
 	 */
 	@Override
-	public Account getAccount(final String accountName) throws AccountException {
+	public synchronized Account getAccount(final String accountName) throws AccountException {
 		Account account = dao.getAccount(accountName);
 		if ( account != null ) {
 			account.registerAccountManager(this);
@@ -130,7 +128,7 @@ public class AccountManagerLaplace implements AccountManager {
 	 * @throws AccountException - if operation fails
 	 */
 	@Override
-	public synchronized  void persist(final Account account) throws AccountException {
+	public synchronized void persist(final Account account) throws AccountException {
 		dao.setAccount(account);
 		
 	}
@@ -142,7 +140,7 @@ public class AccountManagerLaplace implements AccountManager {
 	 * @throws AccountException - if error occurs accessing accounts
 	 */
 	@Override
-	public boolean validateLogin(final String accountName, final String password) throws AccountException {
+	public synchronized boolean validateLogin(final String accountName, final String password) throws AccountException {
 		boolean valid = false;
 		final Account account = getAccount(accountName);
 		if (account != null ) {

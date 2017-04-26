@@ -17,10 +17,6 @@ import edu.uw.ext.framework.account.AccountFactory;
 public final class AccountFactoryLaplace implements AccountFactory {
 	private final Logger logger = LoggerFactory.getLogger(AccountFactoryLaplace.class);
 	
-	public AccountFactoryLaplace() {
-		
-	}
-	
 	/**
 	* Instantiates a new account instance.
 	* @param accountName - the account name.

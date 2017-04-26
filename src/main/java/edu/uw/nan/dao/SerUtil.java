@@ -14,7 +14,7 @@ public class SerUtil {
 	}
 	
 	public static void writeByteArray( final DataOutputStream out, final byte[] bytes ) throws IOException {
-		final int length = bytes == null ? -1 : bytes.length;
+		final int length = (bytes == null) ? -1 : bytes.length;
 		out.writeInt(length);
 		
 		if ( length > 0) {

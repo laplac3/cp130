@@ -21,7 +21,7 @@ public class AccountSer {
 		
 	}
 	
-	public static void write(FileOutputStream out, Account account) throws AccountException {
+	public static void write( final FileOutputStream out, final Account account) throws AccountException {
 		try {
 			final DataOutputStream dos = new DataOutputStream(out);
 			dos.writeUTF(account.getName());

@@ -9,11 +9,16 @@ import java.io.IOException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
 import edu.uw.ext.framework.account.Account;
 import edu.uw.ext.framework.account.AccountException;
 import edu.uw.ext.framework.account.Address;
 import edu.uw.ext.framework.account.CreditCard;
 import edu.uw.ext.framework.dao.AccountDao;
+import edu.uw.nan.account.AccountLaplace;
+
 
 public class FileAccountDaoLaplace implements AccountDao {
     private static final Logger logger =
@@ -23,7 +28,7 @@ public class FileAccountDaoLaplace implements AccountDao {
 	private static final String CREDITCARD_FILENAME = "creditcard.dat";
 	private static final File accountsDir = new File("target", "accounts");
 	public static final String APPLICATION_CONTEXT_FILE_NAME = "context.xml";
-	private static final String CREDITCARD_NAME = null;
+
 	
 	public FileAccountDaoLaplace() throws AccountException {
 		 
@@ -72,24 +77,20 @@ public class FileAccountDaoLaplace implements AccountDao {
 					account.setCreditCard(creditCard);
 				
 				}
-				
-				} catch ( final IOException e ) {
-					logger.warn("Unable to access or read account data %s", accountName , e);
-				} catch ( final AccountException aex ) {
-					logger.warn("Unable to process account %s.", accountName, aex);
-				} finally {
-					if ( in != null ) {
-						try {
-							in.close();
-						} catch ( IOException e ) {
-							logger.warn("Attempt to close stream failed.", e );
-						}
+
+			} catch ( final IOException e ) {
+				logger.warn(String.format("Unable to access or read account data %s", accountName) , e);
+			} catch ( final AccountException aex ) {
+				logger.warn(String.format("Unable to process account %s.", accountName), aex);
+			} finally {
+				if ( in != null ) {
+					try {
+						in.close();
+					} catch ( IOException e ) {
+						logger.warn("Attempt to close stream failed.", e );
 					}
 				}
-				
-		
-				
-			
+			}
 		}
 		return account;
 	}
@@ -114,7 +115,7 @@ public class FileAccountDaoLaplace implements AccountDao {
 			if (!accountDir.exists() ) {
 				final boolean success = accountDir.mkdirs();
 				if (!success ) {
-					throw new AccountException( String.format("Unable to creat account directory, %s", account.getName()));
+					throw new AccountException( String.format("Unable to creat account directory, %s", accountDir.getAbsolutePath()));
 				}
 			}
 			
@@ -131,11 +132,12 @@ public class FileAccountDaoLaplace implements AccountDao {
 			}
 			
 			if ( creditCard != null ) {
-				outFile = new File(accountDir, CREDITCARD_NAME);
+				outFile = new File(accountDir, CREDITCARD_FILENAME);
 				out = new FileOutputStream(outFile);
 				CreditCardSer.write(out, creditCard);
 				out.close();
 			}
+		
 		} catch ( final IOException e ) {
 			throw new AccountException("Unable to stroe account(s).", e);
 		} finally {
@@ -164,7 +166,7 @@ public class FileAccountDaoLaplace implements AccountDao {
 			}
 		}
 		if (!file.delete() ) {
-			logger.warn("File deletion failed for " + file.getAbsolutePath());
+			logger.warn(String.format("File deletion failed for, %s ", file.getAbsolutePath()));
 		}
 	}
 
