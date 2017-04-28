@@ -7,6 +7,9 @@ import edu.uw.ext.framework.dao.DaoFactoryException;
 
 public class JsonDaoFactoryLaplace implements DaoFactory {
 
+	public JsonDaoFactoryLaplace() {
+		
+	}
 	@Override
 	public AccountDao getAccountDao() throws DaoFactoryException {
 		try {

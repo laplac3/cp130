@@ -21,9 +21,10 @@
   <bean id="AccountManagerFactory" class="edu.uw.nan.account.AccountManagerFactoryLaplace"/>
 
   <!-- Bean providing RDBMS implementation of edu.uw.ext.framework.account.DaoFactory -->
-  <bean id="DaoFactory" class="edu.uw.nan.dao.JsonDaoFactoryLaplace"/>
-
-
+  <bean id="DaoFactory" class="edu.uw.nan.dao.FileDaoFactoryLaplace"/>
+  
+  <!-- Bean implementing edu.uw.ext.framework.broker.BrokerFactory -->
+  <bean id="BrokerFactory" class="your.BrokerFactory"/>
   
 </beans>
 

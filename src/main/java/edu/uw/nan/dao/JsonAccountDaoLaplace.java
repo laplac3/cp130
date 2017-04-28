@@ -12,12 +12,15 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import edu.uw.ext.framework.account.Account;
 import edu.uw.ext.framework.account.AccountException;
+import edu.uw.ext.framework.account.AccountManager;
 import edu.uw.ext.framework.account.Address;
 import edu.uw.ext.framework.account.CreditCard;
 import edu.uw.ext.framework.dao.AccountDao;
 import edu.uw.nan.account.AccountLaplace;
+import edu.uw.nan.account.AccountManagerLaplace;
 import edu.uw.nan.account.AddressLaplace;
 import edu.uw.nan.account.CreditCardLaplace;
+
 
 public final class JsonAccountDaoLaplace implements AccountDao {
 
@@ -79,8 +82,9 @@ public final class JsonAccountDaoLaplace implements AccountDao {
 		String accountFileName = String.format(JSON_FILENAME, accountName);
 		
 		if ( accountsDir.exists() && accountsDir.isDirectory() ) {
-			final File inf = new File(accountsDir, accountFileName);
+			
 			try {
+				final File inf = new File(accountsDir, accountFileName);
 				account = mapper.readValue(inf, Account.class);
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -92,7 +96,7 @@ public final class JsonAccountDaoLaplace implements AccountDao {
 	
 	@Override
 	public void setAccount(Account account ) throws AccountException {
-
+		
 		try {
 			String accountFileName = String.format(JSON_FILENAME, account.getName());
 			final File outFile = new File( accountsDir, accountFileName);
@@ -107,7 +111,7 @@ public final class JsonAccountDaoLaplace implements AccountDao {
 			if (outFile.exists() ) {
 				boolean delete = outFile.delete();
 				if ( !delete ) {
-					throw new AccountException(String.format("Unable to delete file for %s", 
+					logger.warn(String.format("Unable to delete file for %s", 
 							accountsDir.getAbsolutePath()));
 				}
 			}
