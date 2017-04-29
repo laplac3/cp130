@@ -10,9 +10,9 @@ import edu.uw.ext.framework.order.StopSellOrder;
 /*****************************************************************************
  * Replace these imports with the import of your implementing classes.       *
  *****************************************************************************/
-import edu.uw.rgm.broker.SimpleOrderQueue;
-import edu.uw.rgm.broker.StopBuyOrderComparator;
-import edu.uw.rgm.broker.StopSellOrderComparator;
+import edu.uw.nan.broker.OrderQueueLaplace;
+import edu.uw.nan.broker.StopBuyOrderComparator;
+import edu.uw.nan.broker.StopSellOrderComparator;
 
 /**
  * Concrete subclass of AbstractQueueTest, provides implementations of the 
@@ -36,7 +36,7 @@ public class OrderQueueTest extends AbstractOrderQueueTest {
         /*********************************************************************
          * This needs to be an instance of your OrderQueue and Comparator.   *
          *********************************************************************/
-        return new SimpleOrderQueue<>(0, filter, new StopBuyOrderComparator());
+        return new OrderQueueLaplace<>(0, filter, new StopBuyOrderComparator());
     }
 
     /**
