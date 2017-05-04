@@ -1,6 +1,10 @@
 package edu.uw.nan.broker;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import edu.uw.ext.framework.account.Account;
+import edu.uw.ext.framework.account.AccountException;
 import edu.uw.ext.framework.account.AccountManager;
 import edu.uw.ext.framework.broker.BrokerException;
 import edu.uw.ext.framework.exchange.ExchangeEvent;
@@ -10,6 +14,7 @@ import edu.uw.ext.framework.order.MarketBuyOrder;
 import edu.uw.ext.framework.order.MarketSellOrder;
 import edu.uw.ext.framework.order.StopBuyOrder;
 import edu.uw.ext.framework.order.StopSellOrder;
+import edu.uw.nan.account.AccountLaplace;
 
 /**
  * @author Neil Nevitt
@@ -20,6 +25,7 @@ public class BrokerLaplace implements
 	edu.uw.ext.framework.broker.Broker, 
 	edu.uw.ext.framework.exchange.ExchangeListener {
 
+	private static final Logger logger = LoggerFactory.getLogger(BrokerLaplace.class);
 	/**
 	 * marketOrders
 	 * The market order queue.
@@ -68,7 +74,7 @@ public class BrokerLaplace implements
 	 * @param event - the exchange (closed) event
 	 */
 	@Override
-	public final void exchangeClosed(ExchangeEvent arg0) {
+	public final void exchangeClosed(ExchangeEvent event) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -131,8 +137,16 @@ public class BrokerLaplace implements
 	 */
 	@Override
 	public Account getAccount(String username, String password) throws BrokerException {
-		// TODO Auto-generated method stub
-		return null;
+		Account account = null;
+		try {
+			acctMgr.validateLogin(username,password);
+			account = acctMgr.getAccount(username);
+		} catch (AccountException e) {
+			// TODO Auto-generated catch block
+			logger.warn(String.format("Password does not match.", username));
+		}
+		return account;
+	 
 	}
 
 	/**
@@ -141,8 +155,8 @@ public class BrokerLaplace implements
 	 */
 	@Override
 	public final String getName() {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return this.brokerName;
 	}
 	/**
 	 * Place an order with the broker.

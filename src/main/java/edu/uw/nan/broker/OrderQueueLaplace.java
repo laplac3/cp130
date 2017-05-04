@@ -1,6 +1,7 @@
 package edu.uw.nan.broker;
 
 import java.util.Comparator;
+import java.util.TreeSet;
 import java.util.function.Consumer;
 
 /**
@@ -12,13 +13,17 @@ import java.util.function.Consumer;
  */
 public final class OrderQueueLaplace<T,E extends edu.uw.ext.framework.order.Order> implements edu.uw.ext.framework.broker.OrderQueue<T,E> {
 
+	private TreeSet<E> queue;
+	private java.util.function.BiPredicate<T,E> filter;
 	/**
 	 * Constructor.
 	 * @param threshold - the initial threshold
 	 * @param filter - the dispatch filter used to control dispatching from this queue.
 	 */
 	public OrderQueueLaplace(T threshold, java.util.function.BiPredicate<T,E> filter) {
-		
+		queue = new TreeSet<E>();
+		this.filter = filter;
+		filter.
 	}
 	
 	/**
@@ -36,7 +41,10 @@ public final class OrderQueueLaplace<T,E extends edu.uw.ext.framework.order.Orde
 	 */
 	@Override
 	public E dequeue() {
-		// TODO Auto-generated method stub
+		E order =null;
+		while( !queue.isEmpty()) {
+			if ( filter)
+		}
 		return null;
 	}
 	/**
@@ -44,7 +52,7 @@ public final class OrderQueueLaplace<T,E extends edu.uw.ext.framework.order.Orde
 	 */
 	@Override
 	public void dispatchOrders() {
-		// TODO Auto-generated method stub
+		
 		
 	}
 	
@@ -54,7 +62,8 @@ public final class OrderQueueLaplace<T,E extends edu.uw.ext.framework.order.Orde
 	 */
 	@Override
 	public void enqueue(E order) {
-		// TODO Auto-generated method stub
+		queue.add(order);
+		dispatchOrders();
 		
 	}
 	/**
@@ -77,12 +86,12 @@ public final class OrderQueueLaplace<T,E extends edu.uw.ext.framework.order.Orde
 	}
 	/**
 	 * Adjusts the threshold and dispatches orders.
-	 * @param threshold - - the new threshold
+	 * @param threshold - the new threshold
 	 */
 	@Override
 	public void setThreshold(T threshold) {
-		// TODO Auto-generated method stub
 		
+		dispatchOrders();
 	}
 
 }
