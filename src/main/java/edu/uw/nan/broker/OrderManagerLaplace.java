@@ -2,6 +2,8 @@ package edu.uw.nan.broker;
 
 import java.util.function.Consumer;
 
+import edu.uw.ext.framework.broker.OrderManager;
+import edu.uw.ext.framework.broker.OrderQueue;
 import edu.uw.ext.framework.order.StopBuyOrder;
 import edu.uw.ext.framework.order.StopSellOrder;
 
@@ -10,22 +12,25 @@ import edu.uw.ext.framework.order.StopSellOrder;
  * Maintains queues to different types of orders and requests the execution of orders when price conditions allow their execution.
  *
  */
-public class OrderManagerLaplace implements edu.uw.ext.framework.broker.OrderManager {
+public class OrderManagerLaplace implements OrderManager {
 
 	/**
 	 * Queue for stop buy orders
 	 */
-	protected edu.uw.ext.framework.broker.OrderQueue<Integer,edu.uw.ext.framework.order.StopBuyOrder> stopBuyOrderQueue;
+	protected OrderQueue<Integer,StopBuyOrder> stopBuyOrderQueue;
 	/**
 	 * Queue for stop sell orders
 	 */
-	protected edu.uw.ext.framework.broker.OrderQueue<Integer,edu.uw.ext.framework.order.StopSellOrder> stopSellOrderQueue;	
+	protected OrderQueue<Integer,StopSellOrder> stopSellOrderQueue;	
+	private String stockTickerSymbol;
+	private int price;
+	
 	/**
 	 * Constructor. Constructor to be used by sub classes to finish initialization.
 	 * @param stockTickerSymbol - the ticker symbol of the stock this instance is manage orders for
 	 */
 	protected OrderManagerLaplace(String stockTickerSymbol) {
-		
+		this.stockTickerSymbol = stockTickerSymbol;
 	}
 	
 	/**
@@ -34,7 +39,10 @@ public class OrderManagerLaplace implements edu.uw.ext.framework.broker.OrderMan
 	 * @param price - the current price of stock to be managed
 	 */
 	public OrderManagerLaplace(String stockTickerSymbol, int price) {
-		
+		this.stockTickerSymbol = stockTickerSymbol;
+		this.price = price;
+		stopBuyOrderQueue.setThreshold(price);
+		this.stopSellOrderQueue.setThreshold(price);
 	}
 	/**
 	 * Respond to a stock price adjustment by setting threshold on dispatch filters.
@@ -42,7 +50,8 @@ public class OrderManagerLaplace implements edu.uw.ext.framework.broker.OrderMan
 	 */
 	@Override
 	public final void adjustPrice(int price) {
-		// TODO Auto-generated method stub
+		stopBuyOrderQueue.setThreshold(price);
+		stopSellOrderQueue.setThreshold(price);
 		
 	}
 
@@ -52,8 +61,8 @@ public class OrderManagerLaplace implements edu.uw.ext.framework.broker.OrderMan
 	 */
 	@Override
 	public final String getSymbol() {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return this.stockTickerSymbol;
 	}
 	/**
 	 * Queue a stop buy order.
@@ -61,7 +70,7 @@ public class OrderManagerLaplace implements edu.uw.ext.framework.broker.OrderMan
 	 */
 	@Override
 	public final void queueOrder(StopBuyOrder order) {
-		// TODO Auto-generated method stub
+		stopBuyOrderQueue.enqueue(order);
 		
 	}
 	/**
@@ -70,7 +79,7 @@ public class OrderManagerLaplace implements edu.uw.ext.framework.broker.OrderMan
 	 */
 	@Override
 	public final void queueOrder(StopSellOrder order) {
-		// TODO Auto-generated method stub
+		stopSellOrderQueue.enqueue(order);
 		
 	}
 	/**
@@ -79,7 +88,7 @@ public class OrderManagerLaplace implements edu.uw.ext.framework.broker.OrderMan
 	 */
 	@Override
 	public final void setBuyOrderProcessor(Consumer<StopBuyOrder> processor) {
-		// TODO Auto-generated method stub
+		this.stopBuyOrderQueue.setOrderProcessor(processor);
 		
 	}
 	/**
@@ -88,7 +97,7 @@ public class OrderManagerLaplace implements edu.uw.ext.framework.broker.OrderMan
 	 */
 	@Override
 	public void setSellOrderProcessor(Consumer<StopSellOrder> processor) {
-		// TODO Auto-generated method stub
+		stopSellOrderQueue.setOrderProcessor(processor);
 		
 	}
 

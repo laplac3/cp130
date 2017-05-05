@@ -1,5 +1,7 @@
 package edu.uw.nan.broker;
 
+import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -7,11 +9,14 @@ import edu.uw.ext.framework.account.Account;
 import edu.uw.ext.framework.account.AccountException;
 import edu.uw.ext.framework.account.AccountManager;
 import edu.uw.ext.framework.broker.BrokerException;
+import edu.uw.ext.framework.broker.OrderManager;
+import edu.uw.ext.framework.broker.OrderQueue;
 import edu.uw.ext.framework.exchange.ExchangeEvent;
 import edu.uw.ext.framework.exchange.StockExchange;
 import edu.uw.ext.framework.exchange.StockQuote;
 import edu.uw.ext.framework.order.MarketBuyOrder;
 import edu.uw.ext.framework.order.MarketSellOrder;
+import edu.uw.ext.framework.order.Order;
 import edu.uw.ext.framework.order.StopBuyOrder;
 import edu.uw.ext.framework.order.StopSellOrder;
 import edu.uw.nan.account.AccountLaplace;
@@ -34,7 +39,7 @@ public class BrokerLaplace implements
 	private String brokerName;
 	private edu.uw.ext.framework.exchange.StockExchange exchg;
 	private edu.uw.ext.framework.account.AccountManager acctMgr;
-	
+	private Map<String, OrderManager> orderManagers;
 	
 	/**
 	 * Constructor for sub classes
@@ -75,8 +80,9 @@ public class BrokerLaplace implements
 	 */
 	@Override
 	public final void exchangeClosed(ExchangeEvent event) {
-		// TODO Auto-generated method stub
-		
+		checkFields();
+		marketOrders.setThreshold(false);
+		logger.info("Market is closed.");
 	}
 	/**
 	 * Upon the exchange opening sets the market dispatch filter threshold and processes any available orders.
@@ -84,7 +90,10 @@ public class BrokerLaplace implements
 	 */
 	@Override
 	public final void exchangeOpened(ExchangeEvent event) {
-		// TODO Auto-generated method stub
+		checkFields();
+		marketOrders.setThreshold(true);;
+		marketOrders.dispatchOrders();
+		logger.info("Market is open.");
 		
 	}
 	/**
@@ -93,7 +102,7 @@ public class BrokerLaplace implements
 	 */
 	@Override
 	public void priceChanged(ExchangeEvent event) {
-		// TODO Auto-generated method stub
+		orderManagers.get(event.getTicker()).adjustPrice(event.getPrice());
 		
 	}
 	/**
@@ -102,8 +111,14 @@ public class BrokerLaplace implements
 	 */
 	@Override
 	public void close() throws BrokerException {
-		// TODO Auto-generated method stub
-		
+		exchg.removeExchangeListener(this);
+		try {
+			acctMgr.close();
+		} catch ( AccountException e ) {
+			logger.warn(String.format("Cannot close account manager"), e);
+			throw new BrokeException(e);
+		}
+		orderManagers = null;
 	}
 	/**
 	 * Create an account with the broker.
@@ -115,7 +130,7 @@ public class BrokerLaplace implements
 	 */
 	@Override
 	public final Account createAccount(String username, String password, int balance) throws BrokerException {
-		// TODO Auto-generated method stub
+		checkFields();
 		return null;
 	}
 	/**
@@ -125,7 +140,7 @@ public class BrokerLaplace implements
 	 */
 	@Override
 	public final void deleteAccount(String username) throws BrokerException {
-		// TODO Auto-generated method stub
+		checkFields();
 		
 	}
 	/**
@@ -137,12 +152,12 @@ public class BrokerLaplace implements
 	 */
 	@Override
 	public Account getAccount(String username, String password) throws BrokerException {
+		checkFields();
 		Account account = null;
 		try {
 			acctMgr.validateLogin(username,password);
 			account = acctMgr.getAccount(username);
 		} catch (AccountException e) {
-			// TODO Auto-generated catch block
 			logger.warn(String.format("Password does not match.", username));
 		}
 		return account;
@@ -164,7 +179,7 @@ public class BrokerLaplace implements
 	 */
 	@Override
 	public void placeOrder(MarketBuyOrder order) throws BrokerException {
-		// TODO Auto-generated method stub
+		checkFields();
 		
 	}
 	/**
@@ -173,7 +188,7 @@ public class BrokerLaplace implements
 	 */
 	@Override
 	public void placeOrder(MarketSellOrder order) throws BrokerException {
-		// TODO Auto-generated method stub
+		checkFields();
 		
 	}
 	/**
@@ -183,7 +198,7 @@ public class BrokerLaplace implements
 	 */
 	@Override
 	public void placeOrder(StopBuyOrder order) throws BrokerException {
-		// TODO Auto-generated method stub
+		checkFields();
 		
 	}
 	/**
@@ -193,7 +208,8 @@ public class BrokerLaplace implements
 	 */
 	@Override
 	public void placeOrder(StopSellOrder order) throws BrokerException {
-		// TODO Auto-generated method stub
+		checkFields();
+		
 		
 	}
 	/**
@@ -203,9 +219,14 @@ public class BrokerLaplace implements
 	 * @throws edu.uw.ext.framework.broker.BrokerException - if unable to obtain quote
 	 */
 	@Override
-	public StockQuote requestQuote(String arg0) throws BrokerException {
-		// TODO Auto-generated method stub
+	public StockQuote requestQuote(String symbol) throws BrokerException {
+		checkFields();
 		return null;
 	}
-
+	
+	private void checkFields() {
+		if ( brokerName == null || exchg == null || marketOrders == null || acctMgr == null || orderManagers == null ) {
+			throw new IllegalStateException();
+		}
+	}
 }

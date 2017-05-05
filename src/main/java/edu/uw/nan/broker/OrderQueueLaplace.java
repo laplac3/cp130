@@ -2,7 +2,12 @@ package edu.uw.nan.broker;
 
 import java.util.Comparator;
 import java.util.TreeSet;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
+
+import edu.uw.ext.framework.broker.OrderQueue;
+import edu.uw.ext.framework.order.Order;
+
 
 /**
  * @author Neil Nevitt
@@ -11,20 +16,23 @@ import java.util.function.Consumer;
  * @param T - the dispatch threshold type
  * @param E - the type of order contained in the queue
  */
-public final class OrderQueueLaplace<T,E extends edu.uw.ext.framework.order.Order> implements edu.uw.ext.framework.broker.OrderQueue<T,E> {
+public final class OrderQueueLaplace<T,E extends Order> implements OrderQueue<T,E> {
 
 	private TreeSet<E> queue;
 	private java.util.function.BiPredicate<T,E> filter;
+	private Consumer<E> orderProcessor;
+	private T threshold;
 	/**
 	 * Constructor.
 	 * @param threshold - the initial threshold
 	 * @param filter - the dispatch filter used to control dispatching from this queue.
 	 */
-	public OrderQueueLaplace(T threshold, java.util.function.BiPredicate<T,E> filter) {
+	public OrderQueueLaplace(T threshold, BiPredicate<T,E> filter) {
 		queue = new TreeSet<E>();
 		this.filter = filter;
-		filter.
+		
 	}
+	
 	
 	/**
 	 * Constructor.
@@ -32,7 +40,7 @@ public final class OrderQueueLaplace<T,E extends edu.uw.ext.framework.order.Orde
 	 * @param filter - the dispatch filter used to control dispatching from this queue
 	 * @param cmp - Comparator to be used for ordering
 	 */
-	public OrderQueueLaplace(T threshold, java.util.function.BiPredicate<T,E> filter, Comparator<E> cmp) {
+	public OrderQueueLaplace(T threshold, BiPredicate<T,E> filter, Comparator<E> cmp) {
 		
 	}
 	/**
@@ -43,16 +51,26 @@ public final class OrderQueueLaplace<T,E extends edu.uw.ext.framework.order.Orde
 	public E dequeue() {
 		E order =null;
 		while( !queue.isEmpty()) {
-			if ( filter)
+			order = this.queue.first();
+			if ( filter.test(getThreshold(), order) ) {
+				queue.remove(order);
+			} else {
+				order = null;
+			}
 		}
-		return null;
+		return order;
 	}
 	/**
 	 * Executes the callback for each dispatchable order. Each dispatchable order is in turn removed from the queue and passed to the callback. If no callback is registered the order is simply removed from the queue.
 	 */
 	@Override
 	public void dispatchOrders() {
-		
+		E order = null;
+		while ( (order = dequeue()) != null ) {
+			if (orderProcessor != null ) {
+				orderProcessor.accept(order);
+			}
+		}
 		
 	}
 	
@@ -72,8 +90,7 @@ public final class OrderQueueLaplace<T,E extends edu.uw.ext.framework.order.Orde
 	 */
 	@Override
 	public T getThreshold() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.threshold;
 	}
 	/**
 	 * Registers the callback to be used during order processing.
@@ -81,8 +98,7 @@ public final class OrderQueueLaplace<T,E extends edu.uw.ext.framework.order.Orde
 	 */
 	@Override
 	public void setOrderProcessor(Consumer<E> proc) {
-		// TODO Auto-generated method stub
-		
+		this.orderProcessor = proc;
 	}
 	/**
 	 * Adjusts the threshold and dispatches orders.
@@ -90,7 +106,7 @@ public final class OrderQueueLaplace<T,E extends edu.uw.ext.framework.order.Orde
 	 */
 	@Override
 	public void setThreshold(T threshold) {
-		
+		this.threshold = threshold;
 		dispatchOrders();
 	}
 

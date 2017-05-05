@@ -2,13 +2,14 @@ package edu.uw.nan.broker;
 
 import edu.uw.ext.framework.account.AccountManager;
 import edu.uw.ext.framework.broker.Broker;
+import edu.uw.ext.framework.broker.BrokerFactory;
 import edu.uw.ext.framework.exchange.StockExchange;
 
 /**
  * @author Neil Nevitt
  * BrokerFactory implementation that returns a SimpleBroker.
  */
-public class BrokerFactoryLaplace implements edu.uw.ext.framework.broker.BrokerFactory {
+public class BrokerFactoryLaplace implements BrokerFactory {
 
 	/**
 	 * Constructor
@@ -26,7 +27,7 @@ public class BrokerFactoryLaplace implements edu.uw.ext.framework.broker.BrokerF
 	@Override
 	public final Broker newBroker(String name, AccountManager acctManager, StockExchange exch ) {
 		
-		return null;
+		return new BrokerLaplace(name, exch,acctManager);
 	}
 
 }
