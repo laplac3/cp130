@@ -1,6 +1,7 @@
 package edu.uw.nan.broker;
 
 import java.util.Map;
+import java.util.TreeMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,7 @@ public class BrokerLaplace implements
 	 * marketOrders
 	 * The market order queue.
 	 */
-	protected edu.uw.ext.framework.broker.OrderQueue<Boolean,edu.uw.ext.framework.order.Order> marketOrders;
+	protected edu.uw.ext.framework.broker.OrderQueue<Boolean,Order> marketOrders;
 	private String brokerName;
 	private edu.uw.ext.framework.exchange.StockExchange exchg;
 	private edu.uw.ext.framework.account.AccountManager acctMgr;
@@ -52,6 +53,10 @@ public class BrokerLaplace implements
 		this.brokerName = brokerName;
 		this.exchg = exchg;
 		this.acctMgr = acctMgr;
+		orderManagers = new TreeMap<>();
+		
+		
+		
 	}
 
 //	/**
@@ -116,7 +121,7 @@ public class BrokerLaplace implements
 			acctMgr.close();
 		} catch ( AccountException e ) {
 			logger.warn(String.format("Cannot close account manager"), e);
-			throw new BrokeException(e);
+			throw new BrokerException(e);
 		}
 		orderManagers = null;
 	}
@@ -131,7 +136,15 @@ public class BrokerLaplace implements
 	@Override
 	public final Account createAccount(String username, String password, int balance) throws BrokerException {
 		checkFields();
-		return null;
+		Account account = null;
+		try {
+			account = acctMgr.createAccount(username, password, balance);
+		} catch ( AccountException e) {
+			logger.error(String.format("unable to create account for %s", username),e);
+			throw new BrokerException(e);
+
+		}
+		return account;
 	}
 	/**
 	 * Delete an account with the broker.
@@ -141,7 +154,12 @@ public class BrokerLaplace implements
 	@Override
 	public final void deleteAccount(String username) throws BrokerException {
 		checkFields();
-		
+		try {
+			acctMgr.deleteAccount(username);
+		} catch ( AccountException e ) {
+			logger.error(String.format("Unable to delete account for %s", username),e);
+			throw new BrokerException(e);
+		}
 	}
 	/**
 	 * Locate an account with the broker. The username and password are first verified and the account is returned.

@@ -2,15 +2,21 @@ package edu.uw.nan.broker;
 
 
 import edu.uw.nan.broker.OrderQueueLaplace;
+
+import java.util.function.BiPredicate;
+
 import edu.uw.ext.framework.order.Order;
 
-public class MarketOrderDispatchFilter implements DispatchFilter<Boolean,Order> {
 
-	public MarketDispatchFilter( boolean marketOnOff ) {
-		setThreshold(marketOnOff);
+public class MarketOrderDispatchFilter implements BiPredicate<Boolean, Order> {
+
+	@Override
+	public boolean test(Boolean t, Order u) {
+		// TODO Auto-generated method stub
+		return false;
 	}
-	
-	public boolean check( final Order order) {
-		return getThreshold();
-	}
+
+
 }
+
+
