@@ -1,5 +1,7 @@
 package edu.uw.nan.broker;
 
+import java.util.Comparator;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 
 import edu.uw.ext.framework.broker.OrderManager;
@@ -39,10 +41,13 @@ public class OrderManagerLaplace implements OrderManager {
 	 * @param price - the current price of stock to be managed
 	 */
 	public OrderManagerLaplace(String stockTickerSymbol, int price) {
-		this.stockTickerSymbol = stockTickerSymbol;
+		this(stockTickerSymbol);
 		this.price = price;
-		stopBuyOrderQueue.setThreshold(price);
-		this.stopSellOrderQueue.setThreshold(price);
+		stopBuyOrderQueue = new OrderQueueLaplace<Integer,StopBuyOrder>(price,
+				(t,o) -> o.getPrice() <= t, Comparator.comparing(StopBuyOrder::getPrice).thenComparing(StopBuyOrder::compareTo));
+		
+		stopSellOrderQueue = new OrderQueueLaplace<Integer,StopSellOrder>(price,
+				(t,o) -> o.getPrice() >= t, Comparator.comparing(StopSellOrder::getPrice).reversed().thenComparing(StopSellOrder::compareTo));
 	}
 	/**
 	 * Respond to a stock price adjustment by setting threshold on dispatch filters.

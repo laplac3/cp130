@@ -2,7 +2,7 @@ package edu.uw.nan;
 
 import test.AbstractOrderQueueTest;
 import edu.uw.ext.framework.broker.OrderQueue;
-import edu.uw.ext.framework.broker.DispatchFilter;
+import edu.uw.ext.framework.broker.*;
 import edu.uw.ext.framework.order.Order;
 import edu.uw.ext.framework.order.StopBuyOrder;
 import edu.uw.ext.framework.order.StopSellOrder;
@@ -11,8 +11,7 @@ import edu.uw.ext.framework.order.StopSellOrder;
  * Replace these imports with the import of your implementing classes.       *
  *****************************************************************************/
 import edu.uw.nan.broker.OrderQueueLaplace;
-import edu.uw.nan.broker.StopBuyOrderComparator;
-import edu.uw.nan.broker.StopSellOrderComparator;
+
 
 /**
  * Concrete subclass of AbstractQueueTest, provides implementations of the 

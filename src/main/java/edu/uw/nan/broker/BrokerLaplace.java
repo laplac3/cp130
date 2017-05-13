@@ -1,7 +1,9 @@
 package edu.uw.nan.broker;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,10 +39,22 @@ public class BrokerLaplace implements
 	 * The market order queue.
 	 */
 	protected edu.uw.ext.framework.broker.OrderQueue<Boolean,Order> marketOrders;
+	/**
+	 * Name of the broker
+	 */
 	private String brokerName;
+	/**
+	 * The stock exchange
+	 */
 	private edu.uw.ext.framework.exchange.StockExchange exchg;
+	/**
+	 * The account manager.
+	 */
 	private edu.uw.ext.framework.account.AccountManager acctMgr;
-	private Map<String, OrderManager> orderManagers;
+	/**
+	 * The order managers.
+	 */
+	private HashMap<String, OrderManager> orderManagers; 
 	
 	/**
 	 * Constructor for sub classes
@@ -48,35 +62,62 @@ public class BrokerLaplace implements
 	 * @param exchg - the stock exchange to be used by the broker
 	 * @param acctMgr - the account manager to be used by the broker
 	 */
-	protected BrokerLaplace(String brokerName, StockExchange exchg, AccountManager acctMgr) {
+	protected BrokerLaplace(final String brokerName,final StockExchange exchg, final AccountManager acctMgr) {
 		super();
 		this.brokerName = brokerName;
 		this.exchg = exchg;
 		this.acctMgr = acctMgr;
-		orderManagers = new TreeMap<>();
-		
 		
 		
 	}
 
-//	/**
-//	 * Constructor
-//	 * @param brokerName - name of the broker
-//	 * @param exchg - the stock exchange to be used by the broker
-//	 * @param acctMgr - the account manager to be used by the broker
-//	 */
-//	public BrokerLaplace(String brokerName, StockExchange exchg, AccountManager acctMgr) {
-//		super();
-//		this.brokerName = brokerName;
-//		this.exchg = exchg;
-//		this.acctMgr = acctMgr;
-//	}
+	/**
+	 * Constructor
+	 * @param brokerName - name of the broker
+	 * @param exchg - the stock exchange to be used by the broker
+	 * @param acctMgr - the account manager to be used by the broker
+	 */
+	public BrokerLaplace( final String brokerName, final AccountManager acctMgr, final StockExchange exchg) {
+		this(brokerName,exchg,acctMgr);
+		marketOrders = new OrderQueueLaplace<>(exchg.isOpen(), (Boolean t, Order o)->t);
+		Consumer<Order> stockTracker = (order) -> {
+			logger.info(String.format("Executing - %s", order));
+			final int sharePrice = exchg.executeTrade(order);
+			try {
+				final Account account = acctMgr.getAccount(order.getAccountId());
+				account.reflectOrder(order, sharePrice);
+				logger.info(String.format("New balance - %d", account.getBalance()));
+			} catch ( final AccountException e ) {
+				logger.error(String.format("Unable to update account %s",order.getAccountId()));
+			}
+		};
+		marketOrders.setOrderProcessor(stockTracker);
+		initializeOrderManagers();
+		exchg.addExchangeListener(this);
+	}
 	
 	/**
 	 * Fetch the stock list from the exchange and initialize an order manager for each stock. Only to be used during construction.
 	 */
 	protected final void initializeOrderManagers() {
-		
+		orderManagers = new HashMap<>();
+		final Consumer<StopBuyOrder> mb2mp = ( StopBuyOrder order) -> marketOrders.enqueue(order);
+		final Consumer<StopSellOrder> ms2mp = ( StopSellOrder order ) -> marketOrders.enqueue(order);
+		for ( String ticker : exchg.getTickers() ) {
+			final int curPrice = exchg.getQuote(ticker).getPrice();
+			final OrderManager orderMgr = createOrderManager(ticker,curPrice);
+			orderMgr.setBuyOrderProcessor(mb2mp);
+			orderMgr.setSellOrderProcessor(ms2mp);
+			orderManagers.put(ticker, orderMgr);
+			if ( logger.isInfoEnabled()) {
+				logger.info(String.format("Initialized order manager for %s at $d", ticker, curPrice ));
+			}
+		}
+	}
+
+	private OrderManager createOrderManager(String ticker, int curPrice) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	/**
@@ -106,8 +147,15 @@ public class BrokerLaplace implements
 	 * @param event - the price change event
 	 */
 	@Override
-	public void priceChanged(ExchangeEvent event) {
-		orderManagers.get(event.getTicker()).adjustPrice(event.getPrice());
+	public synchronized void priceChanged(final ExchangeEvent event) {
+		checkFields();
+		if (logger.isInfoEnabled()) {
+			logger.info(String.format("Processing price changes %s:%d", event.getTicker(), event.getPrice()));
+		}
+		OrderManager orderMgr = orderManagers.get(event.getTicker());
+		if ( orderMgr != null ){
+			orderMgr.adjustPrice(event.getPrice());
+		}
 		
 	}
 	/**
@@ -116,14 +164,15 @@ public class BrokerLaplace implements
 	 */
 	@Override
 	public void close() throws BrokerException {
-		exchg.removeExchangeListener(this);
+		
 		try {
+			exchg.removeExchangeListener(this);
 			acctMgr.close();
+			orderManagers = null;
 		} catch ( AccountException e ) {
 			logger.warn(String.format("Cannot close account manager"), e);
 			throw new BrokerException(e);
 		}
-		orderManagers = null;
 	}
 	/**
 	 * Create an account with the broker.
@@ -134,17 +183,15 @@ public class BrokerLaplace implements
 	 * @throws edu.uw.ext.framework.broker.BrokerException - if unable to create account
 	 */
 	@Override
-	public final Account createAccount(String username, String password, int balance) throws BrokerException {
+	public synchronized final Account createAccount(String username, String password, int balance) throws BrokerException {
 		checkFields();
-		Account account = null;
 		try {
-			account = acctMgr.createAccount(username, password, balance);
+			return acctMgr.createAccount(username, password, balance);
 		} catch ( AccountException e) {
 			logger.error(String.format("unable to create account for %s", username),e);
 			throw new BrokerException(e);
-
 		}
-		return account;
+		
 	}
 	/**
 	 * Delete an account with the broker.
@@ -169,12 +216,12 @@ public class BrokerLaplace implements
 	 * @throws edu.uw.ext.framework.broker.BrokerException - username and password are invalid
 	 */
 	@Override
-	public Account getAccount(String username, String password) throws BrokerException {
+	public synchronized final Account getAccount(String username, String password) throws BrokerException {
 		checkFields();
 		Account account = null;
 		try {
-			acctMgr.validateLogin(username,password);
-			account = acctMgr.getAccount(username);
+			if ( acctMgr.validateLogin(username,password) )
+				return account = acctMgr.getAccount(username);
 		} catch (AccountException e) {
 			logger.warn(String.format("Password does not match.", username));
 		}
@@ -196,8 +243,9 @@ public class BrokerLaplace implements
 	 * @param order - the order being placed with the broker.
 	 */
 	@Override
-	public void placeOrder(MarketBuyOrder order) throws BrokerException {
+	public synchronized final void placeOrder(final MarketBuyOrder order) throws BrokerException {
 		checkFields();
+		marketOrders.enqueue(order);
 		
 	}
 	/**
@@ -205,9 +253,9 @@ public class BrokerLaplace implements
 	 * @param order - the order being placed with the broker 
 	 */
 	@Override
-	public void placeOrder(MarketSellOrder order) throws BrokerException {
+	public synchronized final void placeOrder(MarketSellOrder order) throws BrokerException {
 		checkFields();
-		
+		marketOrders.enqueue(order);
 	}
 	/**
 	 * Place an order with the broker.
@@ -215,9 +263,9 @@ public class BrokerLaplace implements
 	 * @throws edu.uw.ext.framework.broker.BrokerException - if unable to place order
 	 */
 	@Override
-	public void placeOrder(StopBuyOrder order) throws BrokerException {
+	public synchronized final void placeOrder(StopBuyOrder order) throws BrokerException {
 		checkFields();
-		
+		orderManagerLookup(order.getStockTicker()).queueOrder(order);
 	}
 	/**
 	 * Place an order with the broker.
@@ -225,10 +273,9 @@ public class BrokerLaplace implements
 	 * @throws edu.uw.ext.framework.broker.BrokerException - if unable to place order
 	 */
 	@Override
-	public void placeOrder(StopSellOrder order) throws BrokerException {
+	public synchronized final void placeOrder(StopSellOrder order) throws BrokerException {
 		checkFields();
-		
-		
+		orderManagerLookup(order.getStockTicker()).queueOrder(order);
 	}
 	/**
 	 * Get a price quote for a stock.
@@ -244,7 +291,15 @@ public class BrokerLaplace implements
 	
 	private void checkFields() {
 		if ( brokerName == null || exchg == null || marketOrders == null || acctMgr == null || orderManagers == null ) {
-			throw new IllegalStateException();
+			throw new IllegalStateException("Broker not properly initialized.");
 		}
+	}
+	
+	private synchronized OrderManager orderManagerLookup(final String ticker ) throws BrokerException {
+	final OrderManager orderMgr = orderManagers.get(ticker);
+	if ( orderMgr == null ) {
+		throw new BrokerException(String.format("Requested stock, $s does not exist", orderMgr.toString()), new AccountException());
+		}
+	return orderMgr;
 	}
 }

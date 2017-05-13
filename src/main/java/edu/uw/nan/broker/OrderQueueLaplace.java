@@ -16,10 +16,10 @@ import edu.uw.ext.framework.order.Order;
  * @param T - the dispatch threshold type
  * @param E - the type of order contained in the queue
  */
-public final class OrderQueueLaplace<T,E extends Order> implements OrderQueue<T,E> {
+public class OrderQueueLaplace<T,E extends Order> implements OrderQueue<T,E> {
 
 	private TreeSet<E> queue;
-	private java.util.function.BiPredicate<T,E> filter;
+	private BiPredicate<T,E> filter;
 	private Consumer<E> orderProcessor;
 	private T threshold;
 	/**
@@ -29,6 +29,7 @@ public final class OrderQueueLaplace<T,E extends Order> implements OrderQueue<T,
 	 */
 	public OrderQueueLaplace(T threshold, BiPredicate<T,E> filter) {
 		queue = new TreeSet<E>();
+		this.threshold = threshold;
 		this.filter = filter;
 		
 	}
@@ -41,7 +42,9 @@ public final class OrderQueueLaplace<T,E extends Order> implements OrderQueue<T,
 	 * @param cmp - Comparator to be used for ordering
 	 */
 	public OrderQueueLaplace(T threshold, BiPredicate<T,E> filter, Comparator<E> cmp) {
-		
+		queue = new TreeSet<>(cmp);
+		this.threshold = threshold;
+		this.filter = filter;
 	}
 	/**
 	 * Removes the highest dispatchable order in the queue. If there are orders in the queue but they do not meet the dispatch threshold order will not be removed and null will be returned.
@@ -105,7 +108,7 @@ public final class OrderQueueLaplace<T,E extends Order> implements OrderQueue<T,
 	 * @param threshold - the new threshold
 	 */
 	@Override
-	public void setThreshold(T threshold) {
+	public final void setThreshold(T threshold) {
 		this.threshold = threshold;
 		dispatchOrders();
 	}
