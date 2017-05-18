@@ -14,7 +14,7 @@ import edu.uw.ext.framework.order.Order;
 
 public class AccountLaplace implements Account {
 
-	/**
+	/** 
 	 * 
 	 */
 	private static final long serialVersionUID = 6344839918545176698L;
@@ -245,11 +245,7 @@ public class AccountLaplace implements Account {
 			else
 				logger.error("Account Manager has not ben initialized.", new Exception());
 		} catch ( final AccountException ex ) {
-			logger.error(String.format("Failed to persist assounct %s after adjusting the price.", acctName,ex));
+			logger.error(String.format("Failed to persist assounct %s after adjusting the price.", acctName), ex);
 		}
-		
 	} 
-
-	
-	
 }

@@ -24,7 +24,7 @@
   <bean id="DaoFactory" class="edu.uw.nan.dao.FileDaoFactoryLaplace"/>
   
   <!-- Bean implementing edu.uw.ext.framework.broker.BrokerFactory -->
-  <bean id="BrokerFactory" class="BrokerFactoryLaplace"/>
+  <bean id="BrokerFactory" class="edu.uw.nan.broker.BrokerFactoryLaplace"/>
   
 </beans>
 

@@ -118,7 +118,7 @@ public final class JsonAccountDaoLaplace implements AccountDao {
 			
 			mapper.writerWithDefaultPrettyPrinter().writeValue(outFile, account);
 		} catch ( final IOException e ) {
-			throw new AccountException("Unable to store account data", e);
+			throw new AccountException("Unable to store account data", e); 
 		}
 	}
 

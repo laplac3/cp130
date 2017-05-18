@@ -17,7 +17,7 @@ import edu.uw.nan.dao.SerUtil;
 
 public class AccountSer {
 	
-	private AccountSer() {
+	private AccountSer() { 
 		
 	}
 	

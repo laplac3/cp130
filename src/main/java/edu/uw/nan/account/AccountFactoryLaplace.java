@@ -12,7 +12,7 @@ import edu.uw.ext.framework.account.AccountFactory;
 
 /**
  * @author Neil Nevitt
- * Factory for creation of accounts.
+ * Factory for creation of accounts. 
  */
 public final class AccountFactoryLaplace implements AccountFactory {
 	private final Logger logger = LoggerFactory.getLogger(AccountFactoryLaplace.class);
@@ -27,7 +27,7 @@ public final class AccountFactoryLaplace implements AccountFactory {
 	@Override
 	public Account newAccount(String accountName, byte[] hashPassword, int intBalance) {
 		
-		AccountLaplace account = null;
+		AccountLaplace account = null; 
 		try {
 			account = new AccountLaplace( accountName, hashPassword, intBalance);
 			if ( logger.isInfoEnabled() ) {

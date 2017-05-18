@@ -1,7 +1,6 @@
 package edu.uw.nan.broker;
 
 import java.util.Comparator;
-import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 
 import edu.uw.ext.framework.broker.OrderManager;
@@ -24,9 +23,12 @@ public class OrderManagerLaplace implements OrderManager {
 	 * Queue for stop sell orders
 	 */
 	protected OrderQueue<Integer,StopSellOrder> stopSellOrderQueue;	
+	/**
+	 * The stock ticker symbol.
+	 */
 	private String stockTickerSymbol;
-	private int price;
 	
+
 	/**
 	 * Constructor. Constructor to be used by sub classes to finish initialization.
 	 * @param stockTickerSymbol - the ticker symbol of the stock this instance is manage orders for
@@ -42,12 +44,14 @@ public class OrderManagerLaplace implements OrderManager {
 	 */
 	public OrderManagerLaplace(String stockTickerSymbol, int price) {
 		this(stockTickerSymbol);
-		this.price = price;
-		stopBuyOrderQueue = new OrderQueueLaplace<Integer,StopBuyOrder>(price,
-				(t,o) -> o.getPrice() <= t, Comparator.comparing(StopBuyOrder::getPrice).thenComparing(StopBuyOrder::compareTo));
+
+		stopBuyOrderQueue = new OrderQueueLaplace<>(price,
+				(t,o) -> o.getPrice() <= t,
+				Comparator.comparing(StopBuyOrder::getPrice).thenComparing(StopBuyOrder::compareTo));
 		
-		stopSellOrderQueue = new OrderQueueLaplace<Integer,StopSellOrder>(price,
-				(t,o) -> o.getPrice() >= t, Comparator.comparing(StopSellOrder::getPrice).reversed().thenComparing(StopSellOrder::compareTo));
+		stopSellOrderQueue = new OrderQueueLaplace<>(price,
+				(t,o) -> o.getPrice() >= t,
+				Comparator.comparing(StopSellOrder::getPrice).reversed().thenComparing(StopSellOrder::compareTo));
 	}
 	/**
 	 * Respond to a stock price adjustment by setting threshold on dispatch filters.

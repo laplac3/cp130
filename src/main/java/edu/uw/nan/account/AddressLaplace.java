@@ -6,7 +6,7 @@ import edu.uw.ext.framework.account.Address;
 public class AddressLaplace implements Address {
  
 
-	/**
+	/** 
 	 * Version Id.
 	 */
 	private static final long serialVersionUID = 6841030734859962365L;

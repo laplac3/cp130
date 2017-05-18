@@ -7,11 +7,9 @@ edu/uw/nan/dao/CreditCardSer.class
 edu/uw/nan/dao/AddressSer.class
 edu/uw/nan/broker/OrderManagerLaplace.class
 edu/uw/nan/account/AccountLaplace.class
-edu/uw/nan/broker/StopBuyOrderComparator.class
 edu/uw/nan/dao/JsonDaoFactoryLaplace.class
 edu/uw/nan/broker/BrokerLaplace.class
 edu/uw/nan/account/AccountManagerFactoryLaplace.class
-edu/uw/nan/broker/StopSellOrderComparator.class
 edu/uw/nan/dao/JsonAccountDaoLaplace.class
 edu/uw/nan/account/AccountManagerLaplace.class
 edu/uw/nan/account/CreditCardLaplace.class

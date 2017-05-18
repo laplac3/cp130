@@ -30,7 +30,7 @@ public class FileAccountDaoLaplace implements AccountDao {
 	public static final String APPLICATION_CONTEXT_FILE_NAME = "context.xml";
 
 	
-	public FileAccountDaoLaplace() throws AccountException {
+	public FileAccountDaoLaplace() throws AccountException { 
 		 
 	}
 	@Override

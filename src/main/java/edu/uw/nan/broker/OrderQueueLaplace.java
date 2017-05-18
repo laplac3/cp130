@@ -18,9 +18,21 @@ import edu.uw.ext.framework.order.Order;
  */
 public class OrderQueueLaplace<T,E extends Order> implements OrderQueue<T,E> {
 
+	/**
+	 * The queue.
+	 */
 	private TreeSet<E> queue;
+	/**
+	 * The filter.
+	 */
 	private BiPredicate<T,E> filter;
+	/**
+	 * The order processor. 
+	 */
 	private Consumer<E> orderProcessor;
+	/**
+	 * The threshold.
+	 */
 	private T threshold;
 	/**
 	 * Constructor.
@@ -28,7 +40,7 @@ public class OrderQueueLaplace<T,E extends Order> implements OrderQueue<T,E> {
 	 * @param filter - the dispatch filter used to control dispatching from this queue.
 	 */
 	public OrderQueueLaplace(T threshold, BiPredicate<T,E> filter) {
-		queue = new TreeSet<E>();
+		queue = new TreeSet<>();
 		this.threshold = threshold;
 		this.filter = filter;
 		
@@ -53,9 +65,9 @@ public class OrderQueueLaplace<T,E extends Order> implements OrderQueue<T,E> {
 	@Override
 	public E dequeue() {
 		E order =null;
-		while( !queue.isEmpty()) {
-			order = this.queue.first();
-			if ( filter.test(getThreshold(), order) ) {
+		if( !queue.isEmpty()) {
+			order = queue.first();
+			if ( filter.test(threshold, order) ) {
 				queue.remove(order);
 			} else {
 				order = null;
@@ -68,11 +80,11 @@ public class OrderQueueLaplace<T,E extends Order> implements OrderQueue<T,E> {
 	 */
 	@Override
 	public void dispatchOrders() {
-		E order = null;
+		E order;
 		while ( (order = dequeue()) != null ) {
 			if (orderProcessor != null ) {
 				orderProcessor.accept(order);
-			}
+			}  //condition.signel
 		}
 		
 	}
@@ -93,7 +105,7 @@ public class OrderQueueLaplace<T,E extends Order> implements OrderQueue<T,E> {
 	 */
 	@Override
 	public T getThreshold() {
-		return this.threshold;
+		return threshold;
 	}
 	/**
 	 * Registers the callback to be used during order processing.
@@ -101,7 +113,7 @@ public class OrderQueueLaplace<T,E extends Order> implements OrderQueue<T,E> {
 	 */
 	@Override
 	public void setOrderProcessor(Consumer<E> proc) {
-		this.orderProcessor = proc;
+		orderProcessor = proc;
 	}
 	/**
 	 * Adjusts the threshold and dispatches orders.

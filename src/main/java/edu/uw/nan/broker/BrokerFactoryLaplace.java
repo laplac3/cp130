@@ -11,12 +11,7 @@ import edu.uw.ext.framework.exchange.StockExchange;
  */
 public class BrokerFactoryLaplace implements BrokerFactory {
 
-	/**
-	 * Constructor
-	 */
-	public BrokerFactoryLaplace() {
-		
-	}
+
 	/**
 	 * Instantiates a new SimpleBroker.
 	 * @param name - the broker's name
@@ -27,7 +22,7 @@ public class BrokerFactoryLaplace implements BrokerFactory {
 	@Override
 	public final Broker newBroker(String name, AccountManager acctManager, StockExchange exch ) {
 		
-		return new BrokerLaplace(name, exch,acctManager);
+		return new BrokerLaplace(name, acctManager,exch);
 	}
 
 }

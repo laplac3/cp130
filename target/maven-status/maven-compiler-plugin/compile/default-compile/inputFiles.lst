@@ -3,7 +3,6 @@
 /Users/laplace/cs/cp130-1/src/main/java/edu/uw/nan/broker/BrokerLaplace.java
 /Users/laplace/cs/cp130-1/src/main/java/edu/uw/nan/account/AccountLaplace.java
 /Users/laplace/cs/cp130-1/src/main/java/edu/uw/nan/broker/BrokerFactoryLaplace.java
-/Users/laplace/cs/cp130-1/src/main/java/edu/uw/nan/broker/StopBuyOrderComparator.java
 /Users/laplace/cs/cp130-1/src/main/java/edu/uw/nan/account/AccountFactoryLaplace.java
 /Users/laplace/cs/cp130-1/src/main/java/edu/uw/nan/dao/AddressSer.java
 /Users/laplace/cs/cp130-1/src/main/java/edu/uw/nan/account/AddressLaplace.java
@@ -16,5 +15,4 @@
 /Users/laplace/cs/cp130-1/src/main/java/edu/uw/nan/account/AccountManagerFactoryLaplace.java
 /Users/laplace/cs/cp130-1/src/main/java/edu/uw/nan/broker/OrderManagerLaplace.java
 /Users/laplace/cs/cp130-1/src/main/java/edu/uw/nan/broker/OrderQueueLaplace.java
-/Users/laplace/cs/cp130-1/src/main/java/edu/uw/nan/broker/StopSellOrderComparator.java
 /Users/laplace/cs/cp130-1/src/main/java/edu/uw/nan/dao/SerUtil.java

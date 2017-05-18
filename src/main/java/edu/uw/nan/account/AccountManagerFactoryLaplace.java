@@ -18,7 +18,7 @@ public class AccountManagerFactoryLaplace implements AccountManagerFactory {
 	@Override
 	public AccountManager newAccountManager(AccountDao dao) {
 		AccountManager accountManager = new AccountManagerLaplace(dao);
-		return accountManager;
+		return accountManager; 
 	}
 	
 

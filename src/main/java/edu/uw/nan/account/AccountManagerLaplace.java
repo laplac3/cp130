@@ -28,7 +28,7 @@ public class AccountManagerLaplace implements AccountManager {
 	
 	private final String ENCODING = "ISO-8859-1";
 	private final String ALGORITHIM = "SHA1";
-	/**
+	/** 
 	 * The account factory.
 	 */
 	private AccountFactory accountFactory;
@@ -116,7 +116,7 @@ public class AccountManagerLaplace implements AccountManager {
 	 */
 	@Override
 	public synchronized Account getAccount(final String accountName) throws AccountException {
-		Account account = dao.getAccount(accountName);
+		final Account account = dao.getAccount(accountName);
 		if ( account != null ) {
 			account.registerAccountManager(this);
 		}
