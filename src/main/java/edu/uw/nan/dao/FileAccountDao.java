@@ -20,9 +20,9 @@ import edu.uw.ext.framework.dao.AccountDao;
 import edu.uw.nan.account.AccountLaplace;
 
 
-public class FileAccountDaoLaplace implements AccountDao {
+public class FileAccountDao implements AccountDao {
     private static final Logger logger =
-            LoggerFactory.getLogger(FileAccountDaoLaplace.class);
+            LoggerFactory.getLogger(FileAccountDao.class);
 	private static final String ACCOUNT_FILENAME = "account.dat";
 	private static final String ADDRESS_FILENAME = "address.dat";
 	private static final String CREDITCARD_FILENAME = "creditcard.dat";
@@ -30,7 +30,7 @@ public class FileAccountDaoLaplace implements AccountDao {
 	public static final String APPLICATION_CONTEXT_FILE_NAME = "context.xml";
 
 	
-	public FileAccountDaoLaplace() throws AccountException { 
+	public FileAccountDao() throws AccountException { 
 		 
 	}
 	@Override

@@ -22,16 +22,16 @@ import edu.uw.nan.account.AddressLaplace;
 import edu.uw.nan.account.CreditCardLaplace;
 
 
-public final class JsonAccountDaoLaplace implements AccountDao {
+public final class JsonAccountDao implements AccountDao {
 
-	private static final Logger logger = LoggerFactory.getLogger(JsonAccountDaoLaplace.class);
+	private static final Logger logger = LoggerFactory.getLogger(JsonAccountDao.class);
 	
 	private static final String JSON_FILENAME = "%s.json";
 	private static final File accountsDir = new File("target", "accounts");
 
 	private final ObjectMapper mapper;
 	
-	public JsonAccountDaoLaplace() throws AccountException {
+	public JsonAccountDao() throws AccountException {
 		final SimpleModule module = new SimpleModule();
 		module.addAbstractTypeMapping(Account.class, AccountLaplace.class);
 		module.addAbstractTypeMapping(Address.class, AddressLaplace.class);

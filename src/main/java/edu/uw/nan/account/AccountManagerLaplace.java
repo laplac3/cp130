@@ -16,8 +16,6 @@ import edu.uw.ext.framework.account.AccountManager;
 import edu.uw.ext.framework.dao.AccountDao;
 
 
-import edu.uw.nan.dao.FileAccountDaoLaplace;
-
 /**
  * @author Neil Nevitt
  * Manages basic account operations; create, delete, authentication and persistence.
@@ -44,7 +42,7 @@ public class AccountManagerLaplace implements AccountManager {
 	public AccountManagerLaplace(final AccountDao dao) {
 		this.dao = dao;
 		try ( ClassPathXmlApplicationContext appContext = new ClassPathXmlApplicationContext("context.xml")) {
-			accountFactory = appContext.getBean(AccountFactory.class);
+			accountFactory = appContext.getBean(AccountFactoryLaplace.class);
 		} catch ( final BeansException e) {
 			logger.error("Unable to create account Manager", e);;
 		}
@@ -71,16 +69,17 @@ public class AccountManagerLaplace implements AccountManager {
 	 */
 	@Override
 	public synchronized Account createAccount(final String accountName, final String password, int balance) throws AccountException {
-		
-		if ( dao.getAccount(accountName) == null ) {
+		Account account = dao.getAccount(accountName);
+		if (  account == null ) {
 			final byte[] passwordHash = hashPassword(password);
-			final Account account = accountFactory.newAccount(accountName, passwordHash, balance);
+			account = accountFactory.newAccount(accountName, passwordHash, balance);
 			account.registerAccountManager(this);
 			persist(account);
-			return account;
+
 		} else {
 			throw new AccountException("account name is already in use.");
 		}
+		return account;
 	}
 	
 	private byte[] hashPassword(String password) throws AccountException {

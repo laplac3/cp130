@@ -6,7 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-
+import org.springframework.beans.BeansException;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 
@@ -27,7 +27,9 @@ public class AddressSer {
 			address.setStreetAddress(SerUtil.readString(din));
 			address.setZipCode(SerUtil.readString(din));
 			return address;
-		} catch (IOException e) {
+		} catch (final BeansException ex ) {
+			throw new AccountException("Unable to create account instance.", ex);
+		}	catch (IOException e) {
 			throw new AccountException("Unable to set address for account.", e);
 		}
 		 

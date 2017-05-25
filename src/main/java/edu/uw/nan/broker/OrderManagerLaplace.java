@@ -45,11 +45,11 @@ public class OrderManagerLaplace implements OrderManager {
 	public OrderManagerLaplace(String stockTickerSymbol, int price) {
 		this(stockTickerSymbol);
 
-		stopBuyOrderQueue = new OrderQueueLaplace<>(price,
+		stopBuyOrderQueue = new OrderQueueLaplace<>(stockTickerSymbol, price,
 				(t,o) -> o.getPrice() <= t,
 				Comparator.comparing(StopBuyOrder::getPrice).thenComparing(StopBuyOrder::compareTo));
 		
-		stopSellOrderQueue = new OrderQueueLaplace<>(price,
+		stopSellOrderQueue = new OrderQueueLaplace<>(stockTickerSymbol,price,
 				(t,o) -> o.getPrice() >= t,
 				Comparator.comparing(StopSellOrder::getPrice).reversed().thenComparing(StopSellOrder::compareTo));
 	}

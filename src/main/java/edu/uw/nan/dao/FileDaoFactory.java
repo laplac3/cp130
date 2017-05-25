@@ -10,7 +10,7 @@ import edu.uw.ext.framework.dao.DaoFactoryException;
  * Creates DAO objects.
  *
  */
-public class FileDaoFactoryLaplace implements DaoFactory {
+public class FileDaoFactory implements DaoFactory {
 	/**
 	 * Instantiates a new AccountDao object.
 	 * @return a newly instantiated account DAO object
@@ -20,7 +20,7 @@ public class FileDaoFactoryLaplace implements DaoFactory {
 	@Override
 	public AccountDao getAccountDao() throws DaoFactoryException {
 		try {
-			return new FileAccountDaoLaplace();
+			return new FileAccountDao();
 		} catch ( final AccountException e) {
 			throw new DaoFactoryException("Instantiation of FileAccountDao failed.", e);
 		}

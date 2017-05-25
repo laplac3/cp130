@@ -52,18 +52,7 @@ public class BrokerLaplace implements
 	 */
 	private HashMap<String, OrderManager> orderManagers; 
 	
-	/**
-	 * Constructor for sub classes
-	 * @param brokerName - name of the broker
-	 * @param exchg - the stock exchange to be used by the broker
-	 * @param acctMgr - the account manager to be used by the broker
-	 */
-	protected BrokerLaplace(final String brokerName,final StockExchange exchg, final AccountManager acctMgr) {
-		super();
-		this.brokerName = brokerName;
-		this.exchg = exchg;
-		this.acctMgr = acctMgr;		
-	}
+
 
 	/**
 	 * Constructor
@@ -72,8 +61,10 @@ public class BrokerLaplace implements
 	 * @param acctMgr - the account manager to be used by the broker
 	 */
 	public BrokerLaplace( final String brokerName, final AccountManager acctMgr, final StockExchange exchg) {
-		this(brokerName,exchg,acctMgr);
-		marketOrders = new OrderQueueLaplace<>(exchg.isOpen(), (Boolean t, Order o)->t);
+		this.brokerName = brokerName;
+		this.exchg = exchg;
+		this.acctMgr = acctMgr;		
+		marketOrders = new OrderQueueLaplace<>("Market",  exchg.isOpen(), (Boolean t, Order o)->t);
 		Consumer<Order> stockTracker = (order) -> {
 			logger.info(String.format("Executing - %s", order));
 			final int sharePrice = exchg.executeTrade(order);
@@ -171,7 +162,7 @@ public class BrokerLaplace implements
 			acctMgr.close();
 			orderManagers = null;
 		} catch ( AccountException e ) {
-			throw new BrokerException("Cannot close account manager",e);
+			throw new BrokerException();
 		}
 	}
 	/**
@@ -183,7 +174,7 @@ public class BrokerLaplace implements
 	 * @throws edu.uw.ext.framework.broker.BrokerException - if unable to create account
 	 */
 	@Override
-	public synchronized final Account createAccount(String username, String password, int balance) throws BrokerException {
+	public final Account createAccount(String username, String password, int balance) throws BrokerException {
 		checkFields();
 		try {
 			return acctMgr.createAccount(username, password, balance);
@@ -204,8 +195,7 @@ public class BrokerLaplace implements
 		try {
 			acctMgr.deleteAccount(username);
 		} catch ( AccountException e ) {
-			logger.error(String.format("Unable to delete account for %s", username),e);
-			throw new BrokerException(e);
+			throw new BrokerException(String.format("Unable to delete account for %s", username),e);
 		}
 	}
 	/**
@@ -222,10 +212,10 @@ public class BrokerLaplace implements
 			if ( acctMgr.validateLogin(username,password) ) {
 				return acctMgr.getAccount(username);
 			} else {
-				throw new BrokerException("Invalid password or username.");
+				throw new BrokerException(String.format("Invalid password or username for %s.",username));
 			}				
 		} catch ( final AccountException e) {
-			throw new BrokerException("Password does not match.", e);
+			throw new BrokerException(String.format("Password does not match for %s.",username), e);
 		}
 	}
 
@@ -234,7 +224,7 @@ public class BrokerLaplace implements
 	 * @return the name of the broker
 	 */
 	@Override
-	public final String getName() {	
+	public synchronized final String getName() {	
 		return this.brokerName;
 	}
 	/**
@@ -282,11 +272,11 @@ public class BrokerLaplace implements
 	 * @throws edu.uw.ext.framework.broker.BrokerException - if unable to obtain quote
 	 */
 	@Override
-	public StockQuote requestQuote(String symbol) throws BrokerException {
+	public synchronized StockQuote requestQuote(String symbol) throws BrokerException {
 		checkFields();
 		final StockQuote quote = exchg.getQuote(symbol);
 		if ( quote == null ) {
-			throw new BrokerException("quote is null");
+			throw new BrokerException(String.format("quote is null for", symbol));
 		}	
 		return quote;
 	}

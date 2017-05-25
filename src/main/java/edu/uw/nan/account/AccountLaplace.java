@@ -110,9 +110,14 @@ public class AccountLaplace implements Account {
 	 * @param balance - the value to set the balance to in cents
 	 */
 	public void setBalance(final int balance) {
-		
-
-		this.balance = balance;
+        if ( this.balance == 0 && balance < MIN_ACCOUNT_BALANCE) {
+            logger.info("Could not set initial account balance.  Initial set " +
+                                "amount must be greater than or equal to $1,000");
+        }
+        else {
+	        logger.info(String.format("Setting balance of %d", balance));
+	        this.balance = balance; 
+        }
 	}
 	/**
 	 * Gets the full name of the account holder.

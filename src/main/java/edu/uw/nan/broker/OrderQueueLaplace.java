@@ -2,8 +2,13 @@ package edu.uw.nan.broker;
 
 import java.util.Comparator;
 import java.util.TreeSet;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import edu.uw.ext.framework.broker.OrderQueue;
 import edu.uw.ext.framework.order.Order;
@@ -16,8 +21,9 @@ import edu.uw.ext.framework.order.Order;
  * @param T - the dispatch threshold type
  * @param E - the type of order contained in the queue
  */
-public class OrderQueueLaplace<T,E extends Order> implements OrderQueue<T,E> {
+public class OrderQueueLaplace<T,E extends Order> implements OrderQueue<T,E>, Runnable {
 
+	private static final Logger logger = LoggerFactory.getLogger(OrderQueueLaplace.class);
 	/**
 	 * The queue.
 	 */
@@ -35,15 +41,33 @@ public class OrderQueueLaplace<T,E extends Order> implements OrderQueue<T,E> {
 	 */
 	private T threshold;
 	/**
+	 * Thread that does the dispatching
+	 */
+	private Thread thread;
+	/**
+	 * Used to control access to the queue.
+	 */
+	private final ReentrantLock qLock = new ReentrantLock();
+	/**
+	 * Condition used to  process order. 
+	 */
+	private final Condition dCondition = qLock.newCondition();
+	/**
+	 * The lock used to control access to the process callback object.
+	 */
+	private final ReentrantLock pLock = new ReentrantLock();
+	/**
 	 * Constructor.
 	 * @param threshold - the initial threshold
 	 * @param filter - the dispatch filter used to control dispatching from this queue.
 	 */
-	public OrderQueueLaplace(T threshold, BiPredicate<T,E> filter) {
+	public OrderQueueLaplace(String name, T threshold, BiPredicate<T,E> filter) {
 		queue = new TreeSet<>();
 		this.threshold = threshold;
 		this.filter = filter;
-		
+		thread = new Thread(this, name + "OrderDispatchThread");
+		thread.setDaemon(true);
+		thread.start();
 	}
 	
 	
@@ -53,10 +77,13 @@ public class OrderQueueLaplace<T,E extends Order> implements OrderQueue<T,E> {
 	 * @param filter - the dispatch filter used to control dispatching from this queue
 	 * @param cmp - Comparator to be used for ordering
 	 */
-	public OrderQueueLaplace(T threshold, BiPredicate<T,E> filter, Comparator<E> cmp) {
+	public OrderQueueLaplace(String name, T threshold, BiPredicate<T,E> filter, Comparator<E> cmp) {
 		queue = new TreeSet<>(cmp);
 		this.threshold = threshold;
 		this.filter = filter;
+		thread = new Thread(this, name + "OrderDispatchThread");
+		thread.setDaemon(true);
+		thread.start();
 	}
 	/**
 	 * Removes the highest dispatchable order in the queue. If there are orders in the queue but they do not meet the dispatch threshold order will not be removed and null will be returned.
@@ -65,13 +92,20 @@ public class OrderQueueLaplace<T,E extends Order> implements OrderQueue<T,E> {
 	@Override
 	public E dequeue() {
 		E order =null;
-		if( !queue.isEmpty()) {
-			order = queue.first();
-			if ( filter.test(threshold, order) ) {
-				queue.remove(order);
-			} else {
-				order = null;
+		qLock.lock();
+		try {
+			
+			if( !queue.isEmpty()) {
+				order = queue.first();
+				if ( filter != null && filter.test(threshold, order) ) {
+					queue.remove(order);
+				} else {
+					order = null;
+				}
 			}
+			
+		} finally {
+			qLock.unlock();
 		}
 		return order;
 	}
@@ -80,11 +114,11 @@ public class OrderQueueLaplace<T,E extends Order> implements OrderQueue<T,E> {
 	 */
 	@Override
 	public void dispatchOrders() {
-		E order;
-		while ( (order = dequeue()) != null ) {
-			if (orderProcessor != null ) {
-				orderProcessor.accept(order);
-			}  //condition.signel
+		qLock.lock();
+		try {
+			dCondition.signal();
+		} finally {
+			qLock.unlock();
 		}
 		
 	}
@@ -95,9 +129,13 @@ public class OrderQueueLaplace<T,E extends Order> implements OrderQueue<T,E> {
 	 */
 	@Override
 	public void enqueue(E order) {
-		queue.add(order);
+		qLock.lock();
+		try {
+			queue.add(order);
+		} finally {
+			qLock.unlock();
+		}
 		dispatchOrders();
-		
 	}
 	/**
 	 * Obtains the current threshold value.
@@ -113,7 +151,12 @@ public class OrderQueueLaplace<T,E extends Order> implements OrderQueue<T,E> {
 	 */
 	@Override
 	public void setOrderProcessor(Consumer<E> proc) {
-		orderProcessor = proc;
+		pLock.lock();
+		try {
+			orderProcessor = proc;
+		} finally {
+			pLock.unlock();
+		}
 	}
 	/**
 	 * Adjusts the threshold and dispatches orders.
@@ -123,6 +166,33 @@ public class OrderQueueLaplace<T,E extends Order> implements OrderQueue<T,E> {
 	public final void setThreshold(T threshold) {
 		this.threshold = threshold;
 		dispatchOrders();
+	}
+
+
+	@Override
+	public void run() {
+		while (true ) {
+			E order = null;
+			qLock.lock();
+			try {
+				while ( (order = dequeue()) == null ) {
+						dCondition.await();
+					}
+				}catch ( final InterruptedException e ) {
+					logger.info("Order queue interupted.");	
+			} finally {
+				qLock.unlock();
+			}
+			pLock.lock();
+			try {
+				if ( orderProcessor != null) {
+					logger.info(String.format("Order processor %d", order.getOrderId()));
+					orderProcessor.accept(order);
+				}
+			} finally {
+				pLock.unlock();
+			}
+		}
 	}
 
 }
