@@ -3,6 +3,10 @@ package edu.uw.nan.account;
 import edu.uw.ext.framework.account.Address;
 
 
+/**
+ * @author Neil Nevitt
+ *
+ */
 public class AddressLaplace implements Address {
  
 

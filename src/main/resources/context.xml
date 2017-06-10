@@ -26,5 +26,10 @@
   <!-- Bean implementing edu.uw.ext.framework.broker.BrokerFactory -->
   <bean id="BrokerFactory" class="edu.uw.nan.broker.BrokerFactoryLaplace"/>
   
+  <!-- Bean implementing edu.uw.ext.framework.exchange.NetworkExchangeAdapterFactory -->
+  <bean id="NetworkExchangeAdapterFactory" class="edu.uw.nan.exchange.ExchangeNetworkAdapterFactory"/>
+  
+  <!-- Bean implementing edu.uw.nan.exchange.framework.exchange.NetworkExchangeProxyFactory -->
+  <bean id="NetworkExchangeProxyFactory" class="edu.uw.nan.exchange.ExchangeNetworkProxyFactory"/>
 </beans>
 
