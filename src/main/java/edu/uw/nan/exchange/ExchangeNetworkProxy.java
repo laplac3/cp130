@@ -13,6 +13,7 @@ import static edu.uw.nan.exchange.ProtocolConstants.ENCODING;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -48,8 +49,8 @@ public class ExchangeNetworkProxy implements StockExchange {
 	 * @param cmdIpAddress - the address the exchange accepts request on
 	 * @param cmdPort - the address the exchange accepts request on
 	 */
-	public ExchangeNetworkProxy(String eventIpAddress,
-            int eventPort, String cmdIpAddress, int cmdPort) {
+	public ExchangeNetworkProxy(final String eventIpAddress,
+            final int eventPort, final String cmdIpAddress, final int cmdPort) {
 		this.cmdIpAddress = cmdIpAddress;
 		this.cmdPort = cmdPort;
 		this.eventProcessor = new NetEventProcessor(eventIpAddress, eventPort);
@@ -68,7 +69,7 @@ public class ExchangeNetworkProxy implements StockExchange {
 			if ( logger.isInfoEnabled()) {
 				logger.info(String.format("Connected to %s:%d", socket.getLocalAddress(), socket.getLocalPort()));
 			}
-			final java.io.InputStream ins = socket.getInputStream();
+			final InputStream ins = socket.getInputStream();
 			final Reader reader = new InputStreamReader(ins, ENCODING);
 			buffer = new BufferedReader(reader);
 			
@@ -77,11 +78,11 @@ public class ExchangeNetworkProxy implements StockExchange {
 			pwriter = new PrintWriter(writer, true);
 			
 			pwriter.println(GET_STATE_CMD);
-			response = buffer.readLine();
-			
+			response = buffer.readLine();			
 		} catch ( final IOException e ) {
 			logger.warn("Error in sending command", e);
 		}
+		
 		final boolean state = OPEN_STATE.equals(response);
 		return state;
 	}
@@ -98,7 +99,7 @@ public class ExchangeNetworkProxy implements StockExchange {
 			if ( logger.isInfoEnabled()) {
 				logger.info(String.format("Connected to %s:%d", socket.getLocalAddress(), socket.getLocalPort()));
 			}
-			final java.io.InputStream ins = socket.getInputStream();
+			final InputStream ins = socket.getInputStream();
 			final Reader reader = new InputStreamReader(ins, ENCODING);
 			buffer = new BufferedReader(reader);
 			
@@ -112,6 +113,7 @@ public class ExchangeNetworkProxy implements StockExchange {
 		} catch ( final IOException e ) {
 			logger.warn("Error in sending command", e);
 		}
+	
 		final String[] tickers = response.split(ELEMENT_DELIMITER);
 		return tickers;
 	}
@@ -123,6 +125,7 @@ public class ExchangeNetworkProxy implements StockExchange {
 	@Override
 	public StockQuote getQuote(String ticker) {
 		final String command = String.join(ELEMENT_DELIMITER, GET_QUOTE_CMD,ticker);
+		
 		String response = "";
 		PrintWriter pwriter = null;
 		BufferedReader buffer = null;
@@ -130,7 +133,7 @@ public class ExchangeNetworkProxy implements StockExchange {
 			if ( logger.isInfoEnabled()) {
 				logger.info(String.format("Connected to %s:%d", socket.getLocalAddress(), socket.getLocalPort()));
 			}
-			final java.io.InputStream ins = socket.getInputStream();
+			final InputStream ins = socket.getInputStream();
 			final Reader reader = new InputStreamReader(ins, ENCODING);
 			buffer = new BufferedReader(reader);
 			
@@ -144,6 +147,7 @@ public class ExchangeNetworkProxy implements StockExchange {
 		} catch ( final IOException e ) {
 			logger.warn("Error in sending command", e);
 		}
+		
 		int price = INVALID_STOCK;
 		try {
 			price = Integer.parseInt(response);
@@ -176,7 +180,7 @@ public class ExchangeNetworkProxy implements StockExchange {
 			if ( logger.isInfoEnabled()) {
 				logger.info(String.format("Connected to %s:%d", socket.getLocalAddress(), socket.getLocalPort()));
 			}
-			final java.io.InputStream ins = socket.getInputStream();
+			final InputStream ins = socket.getInputStream();
 			final Reader reader = new InputStreamReader(ins, ENCODING);
 			buffer = new BufferedReader(reader);
 			

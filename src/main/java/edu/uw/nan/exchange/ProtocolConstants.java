@@ -12,6 +12,7 @@ public final class ProtocolConstants {
 	
 	public static final String OPEN_STATE = "OPEN";
 	public static final String CLOSED_STATE = "CLOSED";
+	public static final String PRICE_CHANGED = "PRICE_CHANGED";
 		
 	public static final String BUY_ORDERS = "BUY_ORDERS";
 	public static final String SELL_ORDERS = "SELL_ORDERS";

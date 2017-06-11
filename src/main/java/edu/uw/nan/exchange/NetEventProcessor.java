@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
-import java.util.Scanner;
 
 import javax.swing.event.EventListenerList;
 
@@ -123,6 +122,8 @@ public class NetEventProcessor implements Runnable  {
 					l.exchangeOpened(event);
 				case CLOSED:
 					l.exchangeClosed(event);
+				case PRICE_CHANGED:
+					l.priceChanged(event);
 			default:
 				break;
 					

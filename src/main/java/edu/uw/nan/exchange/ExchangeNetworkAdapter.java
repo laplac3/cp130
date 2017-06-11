@@ -81,7 +81,7 @@ public class ExchangeNetworkAdapter implements ExchangeAdapter {
 	 */
 	@Override
 	public void exchangeClosed( ExchangeEvent event ) {
-		logger.info("Exchange is open.");
+		logger.info("Exchange is closed.");
 		try {
 			multiEvent(CLOSED_EVENT);
 		} catch ( final IOException e ) {
@@ -102,7 +102,7 @@ public class ExchangeNetworkAdapter implements ExchangeAdapter {
 		try {
 			multiEvent(msg);
 		} catch (final IOException e ) {
-			logger.error("Erro in multicast price change.",e);
+			logger.error("Error in multicast price change.",e);
 		}
 	}
 	/**

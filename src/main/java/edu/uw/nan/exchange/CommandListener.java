@@ -34,12 +34,7 @@ public class CommandListener implements Runnable {
 	public CommandListener(int commandPort, StockExchange realExchange) {
 		this.commandPort = commandPort;
 		this.realExchange = realExchange;
-		
-		try {
-			server = new ServerSocket( commandPort);
-		} catch ( IOException e ) {
-			logger.error("Cannot open command port", e);
-		}
+
 	}
 	/**
 	 * Accept connections, and create a CommandExecutor for dispatching the command.
@@ -79,14 +74,14 @@ public class CommandListener implements Runnable {
 	 * Terminates this thread gracefully.
 	 */
 	public void terminate() {
+		listen = false;
 		try {
-			listen = false;
 			if ( server != null && !server.isClosed() ) {
 				logger.info("Closing server.");
 				server.close();
 			}
 			server = null;
-			if ( reqExecutor.isShutdown() ) {
+			if ( !reqExecutor.isShutdown() ) {
 				reqExecutor.shutdown();
 				reqExecutor.awaitTermination(1L, TimeUnit.SECONDS);
 			}
