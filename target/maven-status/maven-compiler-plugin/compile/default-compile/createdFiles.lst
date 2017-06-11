@@ -5,6 +5,7 @@ edu/uw/nan/exchange/ExchangeNetworkProxy.class
 edu/uw/nan/account/AccountLaplace.class
 edu/uw/nan/exchange/ExchangeNetworkAdapter.class
 edu/uw/nan/dao/FileDaoFactory.class
+edu/uw/nan/exchange/NetEventProcessor$1.class
 edu/uw/nan/exchange/CommandHandler.class
 edu/uw/nan/exchange/ExchangeNetworkAdapterFactory.class
 edu/uw/nan/dao/JsonDaoFactory.class

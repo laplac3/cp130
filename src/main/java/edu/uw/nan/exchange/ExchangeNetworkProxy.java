@@ -1,15 +1,26 @@
 package edu.uw.nan.exchange;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
-import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Scanner;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import static edu.uw.nan.exchange.ProtocolConstants.GET_STATE_CMD;
+import static edu.uw.nan.exchange.ProtocolConstants.OPEN_STATE;
+import static edu.uw.nan.exchange.ProtocolConstants.GET_TICKERS_CMD;
+import static edu.uw.nan.exchange.ProtocolConstants.ELEMENT_DELIMITER;
+import static edu.uw.nan.exchange.ProtocolConstants.GET_QUOTE_CMD;
+import static edu.uw.nan.exchange.ProtocolConstants.INVALID_STOCK;
+import static edu.uw.nan.exchange.ProtocolConstants.BUY_ORDERS;
+import static edu.uw.nan.exchange.ProtocolConstants.SELL_ORDERS;
+import static edu.uw.nan.exchange.ProtocolConstants.EXECUTE_TRADE_CMD;
+import static edu.uw.nan.exchange.ProtocolConstants.ENCODING;
 
-import javax.swing.event.EventListenerList;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.net.Socket;
+import java.util.concurrent.Executors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,12 +37,10 @@ import edu.uw.ext.framework.order.Order;
  */
 public class ExchangeNetworkProxy implements StockExchange {
 	private static final Logger logger = LoggerFactory.getLogger(ExchangeNetworkProxy.class);
-	private InetAddress address;
-	private MulticastSocket eventSock = null;
-	private NetEventProcessor cmdProcessor;
-	private Socket server;
-	private EventListenerList listeners = new EventListenerList();
-	private final ExecutorService exec = Executors.newSingleThreadExecutor();
+	private NetEventProcessor eventProcessor;
+	private String cmdIpAddress;
+	private int cmdPort;
+	
 	/**
 	 * Constructor.
 	 * @param eventIpAddress - the multicast IP address to connect to
@@ -41,20 +50,10 @@ public class ExchangeNetworkProxy implements StockExchange {
 	 */
 	public ExchangeNetworkProxy(String eventIpAddress,
             int eventPort, String cmdIpAddress, int cmdPort) {
-		try {
-			address =  InetAddress.getByName(eventIpAddress);
-			cmdProcessor = new NetEventProcessor(eventIpAddress,eventPort);
-			
-			exec.execute(cmdProcessor);
-			server = new Socket(cmdIpAddress, cmdPort );
-			
-		} catch (IOException e ) {
-			logger.error(" Cannot connect to socket",e);
-		} finally {
-			if ( eventSock != null ) {
-				eventSock.close();
-			}
-		}
+		this.cmdIpAddress = cmdIpAddress;
+		this.cmdPort = cmdPort;
+		this.eventProcessor = new NetEventProcessor(eventIpAddress, eventPort);
+		Executors.newSingleThreadExecutor().execute(eventProcessor);
 	}
 	/**
 	 * The state of the exchange.
@@ -62,14 +61,29 @@ public class ExchangeNetworkProxy implements StockExchange {
 	 */
 	@Override
 	public boolean isOpen() {
-		boolean isOpen = false;
-		try {
-			final Scanner scan = new Scanner(this.toString()).useDelimiter(ProtocolConstants.ELEMENT_DELIMITER.toString());
-			isOpen = scan.next().equals(ProtocolConstants.OPEN_STATE.toString());
-		} catch ( Exception e ) {
-			logger.error("Can't call event processor.",e);
+		String response = "";
+		PrintWriter pwriter = null;
+		BufferedReader buffer = null;
+		try (Socket socket = new Socket(cmdIpAddress, cmdPort) ){
+			if ( logger.isInfoEnabled()) {
+				logger.info(String.format("Connected to %s:%d", socket.getLocalAddress(), socket.getLocalPort()));
+			}
+			final java.io.InputStream ins = socket.getInputStream();
+			final Reader reader = new InputStreamReader(ins, ENCODING);
+			buffer = new BufferedReader(reader);
+			
+			final OutputStream outs = socket.getOutputStream();
+			final Writer writer = new OutputStreamWriter(outs, ENCODING);
+			pwriter = new PrintWriter(writer, true);
+			
+			pwriter.println(GET_STATE_CMD);
+			response = buffer.readLine();
+			
+		} catch ( final IOException e ) {
+			logger.warn("Error in sending command", e);
 		}
-		return true;
+		final boolean state = OPEN_STATE.equals(response);
+		return state;
 	}
 	/**
 	 * Gets the ticker symbols for all of the stocks in the traded on the exchange.
@@ -77,16 +91,29 @@ public class ExchangeNetworkProxy implements StockExchange {
 	 */
 	@Override
 	public String[] getTickers() {
-		final ArrayList<String> tickers = new ArrayList<>();
-		try {
-			final Scanner scan = new Scanner(this.toString()).useDelimiter(ProtocolConstants.ELEMENT_DELIMITER.toString());
-			while ( scan.hasNext() ) {
-				tickers.add(scan.next());
+		String response = "";
+		PrintWriter pwriter = null;
+		BufferedReader buffer = null;
+		try (Socket socket = new Socket(cmdIpAddress, cmdPort) ){
+			if ( logger.isInfoEnabled()) {
+				logger.info(String.format("Connected to %s:%d", socket.getLocalAddress(), socket.getLocalPort()));
 			}
-		} catch (Exception e) {
-			logger.error("Can't call event processor.",e);
+			final java.io.InputStream ins = socket.getInputStream();
+			final Reader reader = new InputStreamReader(ins, ENCODING);
+			buffer = new BufferedReader(reader);
+			
+			final OutputStream outs = socket.getOutputStream();
+			final Writer writer = new OutputStreamWriter(outs, ENCODING);
+			pwriter = new PrintWriter(writer, true);
+			
+			pwriter.println(GET_TICKERS_CMD);
+			response = buffer.readLine();
+			
+		} catch ( final IOException e ) {
+			logger.warn("Error in sending command", e);
 		}
-		return tickers.toArray(new String[0]);
+		final String[] tickers = response.split(ELEMENT_DELIMITER);
+		return tickers;
 	}
 	/**
 	 * Gets a stocks current price.
@@ -95,11 +122,38 @@ public class ExchangeNetworkProxy implements StockExchange {
 	 */
 	@Override
 	public StockQuote getQuote(String ticker) {
-		StockQuote quote = null;
+		final String command = String.join(ELEMENT_DELIMITER, GET_QUOTE_CMD,ticker);
+		String response = "";
+		PrintWriter pwriter = null;
+		BufferedReader buffer = null;
+		try (Socket socket = new Socket(cmdIpAddress, cmdPort) ){
+			if ( logger.isInfoEnabled()) {
+				logger.info(String.format("Connected to %s:%d", socket.getLocalAddress(), socket.getLocalPort()));
+			}
+			final java.io.InputStream ins = socket.getInputStream();
+			final Reader reader = new InputStreamReader(ins, ENCODING);
+			buffer = new BufferedReader(reader);
+			
+			final OutputStream outs = socket.getOutputStream();
+			final Writer writer = new OutputStreamWriter(outs, ENCODING);
+			pwriter = new PrintWriter(writer, true);
+			
+			pwriter.println(command);
+			response = buffer.readLine();
+			
+		} catch ( final IOException e ) {
+			logger.warn("Error in sending command", e);
+		}
+		int price = INVALID_STOCK;
 		try {
-			quote = new StockQuote(ticker, Integer.valueOf(this.toString()));
-		} catch ( Exception e ) {
-			logger.error("Can't call event processor.",e);
+			price = Integer.parseInt(response);
+		} catch ( NumberFormatException n ) {
+			logger.warn(String.format("String to int failed %s.", response ),n);
+		}
+		
+		StockQuote quote = null;
+		if ( price >= 0 ) {
+			quote = new StockQuote(ticker, price);
 		}
 		return quote;
 	}
@@ -110,13 +164,40 @@ public class ExchangeNetworkProxy implements StockExchange {
 	 */
 	@Override
 	public int executeTrade(Order order) {
-		int price = 0;
-		try {
-			price = Integer.valueOf(this.toString());
-		} catch ( final Exception e) {
-			logger.error(String.format("Failed to execute orderId = %d", order.getOrderId()),e);
+		final String type = ( order.isBuyOrder()) ? BUY_ORDERS : SELL_ORDERS;
+		final String command = String.join(
+				ELEMENT_DELIMITER,EXECUTE_TRADE_CMD, type, order.getAccountId() , 
+				order.getStockTicker(), Integer.toString(order.getNumberOfShares()));
+		
+		String response = "";
+		PrintWriter pwriter = null;
+		BufferedReader buffer = null;
+		try (Socket socket = new Socket(cmdIpAddress, cmdPort) ){
+			if ( logger.isInfoEnabled()) {
+				logger.info(String.format("Connected to %s:%d", socket.getLocalAddress(), socket.getLocalPort()));
+			}
+			final java.io.InputStream ins = socket.getInputStream();
+			final Reader reader = new InputStreamReader(ins, ENCODING);
+			buffer = new BufferedReader(reader);
+			
+			final OutputStream outs = socket.getOutputStream();
+			final Writer writer = new OutputStreamWriter(outs, ENCODING);
+			pwriter = new PrintWriter(writer, true);
+			
+			pwriter.println(command);
+			response = buffer.readLine();
+			
+		} catch ( final IOException e ) {
+			logger.warn("Error in sending command", e);
 		}
-		return price;
+		
+		int executionPrice = 0;
+		try {
+			executionPrice = Integer.parseInt(response);
+		} catch ( final NumberFormatException e) {
+			logger.warn(String.format("String to int failed %s", response),e);
+		}
+		return executionPrice;
 	}
 	/**
 	 * Adds a market listener. Delegates to the NetEventProcessor.
@@ -124,7 +205,7 @@ public class ExchangeNetworkProxy implements StockExchange {
 	 */
 	@Override
 	public void addExchangeListener(ExchangeListener l) {
-		listeners.add(ExchangeListener.class, l);
+		eventProcessor.addExchangeListener(l);
 	}
 	/**
 	 * Removes a market listener. Delegates to the NetEventProcessor.
@@ -132,8 +213,9 @@ public class ExchangeNetworkProxy implements StockExchange {
 	 */
 	@Override
 	public void removeExchangeListener(ExchangeListener l) {
-		listeners.remove(ExchangeListener.class, l);
+		eventProcessor.removeExchangeListener(l);
 		
 	}
+
 
 }

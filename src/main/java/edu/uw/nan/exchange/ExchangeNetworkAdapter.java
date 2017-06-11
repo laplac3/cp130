@@ -7,7 +7,6 @@ import static edu.uw.nan.exchange.ProtocolConstants.OPEN_EVENT;
 import static edu.uw.nan.exchange.ProtocolConstants.PRICE_CHANGE_EVENT;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.net.MulticastSocket;
