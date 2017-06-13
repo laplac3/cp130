@@ -33,15 +33,27 @@ import edu.uw.ext.framework.order.Order;
 
 /**
  * @author Neil Nevitt
- * Client for interacting with a network accessible exchange. This SocketExchange methods encode the method request as a string, per ProtocolConstants, and send the command to the ExchangeNetworkAdapter, receive the response decode it and return the result.
- *
+ * Client for interacting with a network accessible exchange. This SocketExchange methods 
+ * encode the method request as a string, per ProtocolConstants, and send the command to the 
+ * ExchangeNetworkAdapter, receive the response decode it and return the result.
  */
 public class ExchangeNetworkProxy implements StockExchange {
+	/**
+	 * Logger.
+	 */
 	private static final Logger logger = LoggerFactory.getLogger(ExchangeNetworkProxy.class);
+	/**
+	 * The net event processor.
+	 */
 	private NetEventProcessor eventProcessor;
+	/**
+	 * The command IP address.
+	 */
 	private String cmdIpAddress;
+	/**
+	 * The command port.
+	 */
 	private int cmdPort;
-	
 	/**
 	 * Constructor.
 	 * @param eventIpAddress - the multicast IP address to connect to
@@ -217,9 +229,6 @@ public class ExchangeNetworkProxy implements StockExchange {
 	 */
 	@Override
 	public void removeExchangeListener(ExchangeListener l) {
-		eventProcessor.removeExchangeListener(l);
-		
+		eventProcessor.removeExchangeListener(l);	
 	}
-
-
 }

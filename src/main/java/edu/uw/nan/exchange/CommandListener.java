@@ -18,14 +18,30 @@ import edu.uw.ext.framework.exchange.StockExchange;
  * Accepts command requests and dispatches them to a CommandHandler.
  */
 public class CommandListener implements Runnable {
-	
+	/**
+	 * Logger.
+	 */
 	private static final Logger logger = LoggerFactory.getLogger(CommandListener.class);
+	/**
+	 * The command port.
+	 */
 	private final int commandPort;
+	/**
+	 * The Stock exchange.
+	 */
 	private final StockExchange realExchange;
+	/**
+	 * The socket for the server.
+	 */
 	private ServerSocket server;
+	/**
+	 * A boolean for listening. 
+	 */
 	private volatile boolean listen = true;
+	/**
+	 * The request executor. 
+	 */
 	private ExecutorService reqExecutor = Executors.newCachedThreadPool();
-	
 	/**
 	 * Constructor
 	 * @param commandPort - the port to listen for connections on
@@ -34,7 +50,6 @@ public class CommandListener implements Runnable {
 	public CommandListener(int commandPort, StockExchange realExchange) {
 		this.commandPort = commandPort;
 		this.realExchange = realExchange;
-
 	}
 	/**
 	 * Accept connections, and create a CommandExecutor for dispatching the command.
@@ -57,8 +72,7 @@ public class CommandListener implements Runnable {
 					if ( server != null && !server.isClosed() ) {
 						logger.warn("Error accepting connections.", e);
 					}
-				}
-				
+				}	
 				if ( socket == null ) {
 					continue;
 				}
@@ -84,12 +98,13 @@ public class CommandListener implements Runnable {
 			if ( !reqExecutor.isShutdown() ) {
 				reqExecutor.shutdown();
 				reqExecutor.awaitTermination(1L, TimeUnit.SECONDS);
-			}
+			}	
 		} catch ( final InterruptedException e ) {
 			logger.info("Interrupted waiting for executor to terminate.",e);
 		} catch ( IOException e ) {
 			logger.info("Error while closing listening socket", e);
-		} 
+		}
+		
 	}
 
 }

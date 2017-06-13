@@ -15,7 +15,7 @@ import edu.uw.ext.framework.order.Order;
 public class AccountLaplace implements Account {
 
 	/** 
-	 * 
+	 * Version Id.
 	 */
 	private static final long serialVersionUID = 6344839918545176698L;
 
@@ -64,10 +64,14 @@ public class AccountLaplace implements Account {
 	public AccountLaplace(){
 		
 	}
-	
+	/**
+	 * Constructor.
+	 * @param acctName - Name of the account.
+	 * @param passwordHash - Password hash.
+	 * @param balance - balance of the account.
+	 * @throws AccountException - Throws an account exception if the balance is less then the minimum.
+	 */
 	public AccountLaplace(final String acctName, final byte[] passwordHash, final int balance) throws AccountException {
-
-
 		if ( balance < MIN_ACCOUNT_BALANCE ) {
 			final String msg = String.format("Account creation failed for %s , due to balance of %d ", acctName, balance );
 			logger.warn(msg);
@@ -76,7 +80,6 @@ public class AccountLaplace implements Account {
 		setName(acctName);
 		setPasswordHash(passwordHash);
 		this.balance = balance;
-
 	}
 	/**
 	 * Get the account name.
@@ -89,8 +92,7 @@ public class AccountLaplace implements Account {
 	 * Sets the account name. This operation is not generally used but is provided for JavaBean conformance.
 	 * @param acctName - the value to be set for the account name
 	 */
-	public void setName(final String acctName) throws AccountException {
-		
+	public void setName(final String acctName) throws AccountException {		
 		if ( acctName == null || acctName.length() < MIN_NAME_LENGTH ) {
 			final String msg = String.format("Account name %s is unacceptable.", acctName );
 			logger.warn(msg);

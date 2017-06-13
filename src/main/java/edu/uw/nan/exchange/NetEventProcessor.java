@@ -110,8 +110,6 @@ public class NetEventProcessor implements Runnable  {
 	public void removeExchangeListener( ExchangeListener l) {
 		listeners.remove(ExchangeListener.class, l);
 	}
-
-	
 	private void firelisteners( final ExchangeEvent event ) {
 		ExchangeListener[] list;
 		list = listeners.getListeners(ExchangeListener.class );

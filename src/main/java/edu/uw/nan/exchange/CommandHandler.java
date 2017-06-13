@@ -41,9 +41,17 @@ import edu.uw.ext.framework.order.Order;
  * An instance of this class is dedicated to executing commands received from clients.
  */
 public class CommandHandler implements Runnable {
-	
+	/**
+	 * Logger.
+	 */
 	private static Logger logger = LoggerFactory.getLogger(CommandHandler.class);
+	/**
+	 * The stock exchange.
+	 */
 	private final StockExchange realExchange;
+	/**
+	 * The socket
+	 */
 	private Socket sock;
 	/**
 	 * Constructor
@@ -123,8 +131,7 @@ public class CommandHandler implements Runnable {
 						pwriter.println(prices);
 					} else {
 						pwriter.println(0);
-					}
-					
+					}	
 					break;
 					
 				default:

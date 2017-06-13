@@ -20,7 +20,6 @@ public class ExchangeNetworkAdapterFactory implements NetworkExchangeAdapterFact
 	 * Constructor
 	 */
 	public ExchangeNetworkAdapterFactory() {
-		
 	}
 	/**
 	 * Instantiates an ExchangeNetworkAdapter.

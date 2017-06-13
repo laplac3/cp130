@@ -27,11 +27,24 @@ import edu.uw.ext.framework.exchange.StockExchange;
  */
 public class ExchangeNetworkAdapter implements ExchangeAdapter {
 	private static final Logger logger = LoggerFactory.getLogger(ExchangeNetworkAdapter.class);
+	/**
+	 * The Stock exchange.
+	 */
 	private final StockExchange realExchng;
+    /**
+     * The event socket.
+     */
     private MulticastSocket eventSocket;
+    /**
+     * The Datagram packet.
+     */
     private DatagramPacket datagramPacket;
+	/**
+	 * The Command Listeners.
+	 */
 	private CommandListener listener;
 	/**
+	 * Constructors a network with the for the exchange.
 	 * @param exchng - the exchange used to service the network requests
 	 * @param multicastIP - the ip address used to propagate price changes
 	 * @param multicastPort - the ip port used to propagate price changes
@@ -62,14 +75,18 @@ public class ExchangeNetworkAdapter implements ExchangeAdapter {
 		this.realExchng.addExchangeListener(this);
 	}
 	/**
-	 * The exchange has opened and prices are adjusting - add listener to receive price change events from the exchange and multicast them to brokers.
+	 * The exchange has opened and prices are adjusting - add listener to receive price change 
+	 * events from the exchange and multicast them to brokers.
 	 * @param event - the event
 	 */
 	@Override
-	public void exchangeOpened(ExchangeEvent event) {
+	public synchronized void exchangeOpened(ExchangeEvent event) {
 		logger.info("Exchange is open.");
 		try {
-			multiEvent(OPEN_EVENT);
+			final byte[] buffer = OPEN_EVENT.getBytes(ENCODING);
+			datagramPacket.setData(buffer);
+			datagramPacket.setLength(buffer.length);
+			eventSocket.send(datagramPacket);
 		} catch ( final IOException e ) {
 			logger.error("Error when joining price group",e);
 		}
@@ -80,10 +97,13 @@ public class ExchangeNetworkAdapter implements ExchangeAdapter {
 	 * @param event - the event
 	 */
 	@Override
-	public void exchangeClosed( ExchangeEvent event ) {
+	public synchronized void exchangeClosed( ExchangeEvent event ) {
 		logger.info("Exchange is closed.");
 		try {
-			multiEvent(CLOSED_EVENT);
+			final byte[] buffer = CLOSED_EVENT.getBytes(ENCODING);
+			datagramPacket.setData(buffer);
+			datagramPacket.setLength(buffer.length);
+			eventSocket.send(datagramPacket);
 		} catch ( final IOException e ) {
 			logger.error("Error when closing multicast.",e);
 		}
@@ -94,13 +114,16 @@ public class ExchangeNetworkAdapter implements ExchangeAdapter {
 	 * @param event - the event
 	 */
 	@Override
-	public void priceChanged(ExchangeEvent event) {
+	public synchronized void priceChanged(ExchangeEvent event) {
 		final String symbol = event.getTicker();
 		final int price = event.getPrice();
 		final String msg = String.join(ELEMENT_DELIMITER, PRICE_CHANGE_EVENT, symbol, Integer.toString(price));
 		logger.info(msg);
 		try {
-			multiEvent(msg);
+			final byte[] buffer = msg.getBytes(ENCODING);
+			datagramPacket.setData(buffer);
+			datagramPacket.setLength(buffer.length);
+			eventSocket.send(datagramPacket);
 		} catch (final IOException e ) {
 			logger.error("Error in multicast price change.",e);
 		}
@@ -113,13 +136,6 @@ public class ExchangeNetworkAdapter implements ExchangeAdapter {
 		realExchng.removeExchangeListener(this);
 		listener.terminate();
 		eventSocket.close();
-	}
-	
-	private synchronized void multiEvent( final String msg) throws IOException {
-		final byte[] buffer = msg.getBytes(ENCODING);
-		datagramPacket.setData(buffer);
-		datagramPacket.setLength(buffer.length);
-		eventSocket.send(datagramPacket);
 	}
 
 }

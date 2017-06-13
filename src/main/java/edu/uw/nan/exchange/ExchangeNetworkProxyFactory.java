@@ -8,7 +8,6 @@ import edu.uw.ext.framework.exchange.StockExchange;
  * A factory interface for creating ExchangeNetworkProxy instances.
  */
 public class ExchangeNetworkProxyFactory implements NetworkExchangeProxyFactory {
-
 	/**
 	 * Constructor
 	 */
@@ -27,5 +26,4 @@ public class ExchangeNetworkProxyFactory implements NetworkExchangeProxyFactory 
 	public StockExchange newProxy(String multicastIP, int multicastPort, String commandIP, int commandPort) {
 		return new ExchangeNetworkProxy( multicastIP, multicastPort, commandIP, commandPort);
 	}
-
 }
