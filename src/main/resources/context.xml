@@ -31,5 +31,9 @@
   
   <!-- Bean implementing edu.uw.nan.exchange.framework.exchange.NetworkExchangeProxyFactory -->
   <bean id="NetworkExchangeProxyFactory" class="edu.uw.nan.exchange.ExchangeNetworkProxyFactory"/>
+  
+  <!-- Bean implementing edu.uw.ext.framework.order.ClientOrderCodec -->
+  <bean id="ClientOrderCodec" class="edu.uw.nan.encryption.LaplaceClientOrderCodec"/>
+  
 </beans>
 

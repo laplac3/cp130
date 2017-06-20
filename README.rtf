@@ -1,8 +1,10 @@
 {\rtf1\ansi\ansicpg1252\cocoartf1504\cocoasubrtf820
-{\fonttbl\f0\fnil\fcharset0 Monaco;}
-{\colortbl;\red255\green255\blue255;\red133\green0\blue2;\red240\green240\blue228;}
-{\*\expandedcolortbl;;\cssrgb\c60000\c0\c0;\cssrgb\c95294\c95294\c91373;}
-\paperw11900\paperh16840\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+{\fonttbl\f0\fnil\fcharset0 Monaco;\f1\froman\fcharset0 Times-Roman;}
+{\colortbl;\red255\green255\blue255;\red133\green0\blue2;\red240\green240\blue228;\red255\green255\blue255;
+\red0\green0\blue0;\red11\green90\blue178;}
+{\*\expandedcolortbl;;\cssrgb\c60000\c0\c0;\cssrgb\c95294\c95294\c91373;\cssrgb\c100000\c100000\c100000;
+\cssrgb\c0\c0\c0;\cssrgb\c0\c43922\c75294;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww25160\viewh13080\viewkind0
 \deftab720
 \pard\pardeftab720\sl400\partightenfactor0
 
@@ -10,7 +12,113 @@
  mvn clean compile\
     > mvn exec:java -Dexec.mainClass=app.NetExchangeDriver\
 in separate window\
-mvn exec:java -Dexec.mainClass=app.ExchangeProxyDriver\
-\pard\pardeftab720\sl400\partightenfactor0
-\cf2 \cb3  mvn exec:java -Dexec.mainClass=app.EventMonitor\cf2 \cb3 \
-}
+mvn exec:java -Dexec.mainClass=app.ExchangeProxyDriver -D
+\fs24 \cb4 java.net.preferIPv4Stack=true
+\fs26\fsmilli13300 \cb3 \
+ mvn exec:java -Dexec.mainClass=app.EventMonitor\
+\
+\
+\
+\pard\pardeftab720\sl480\sa240\partightenfactor0
+
+\f1\b\fs42\fsmilli21333 \cf5 \cb4 # Generate the key pair and place it in a keystore\cb1 \uc0\u8232 \cb4 keytool -genkeypair -alias broker -keyalg RSA -keysize 1024 -validity 365 -storetype JCEKS -keystore \cf6 brokerKey.jck \cf5 -storepass \cf6 brokerStorPass \cf5 -dname "cn=broker, ou=cp130, o=UW, l=Seattle, st=Washington, c=US" -keypass \cf6 brokerPrivKeyPass \
+\
+keytool -genkeypair -alias broker -keyalg RSA -keysize 1024 -validity 365 \\\
+-storetype JCEKS -keystore brokerKey.jck \\\
+-storepass brokerStorePass \\\
+-dname "cn=broker, ou=cp130, o=UW, l=Seattle, st=Washington, c=US" \\\
+-keypass brokerPrivKeyPass\
+\
+
+\b0\fs24 \cf5 \cb1 \
+
+\b\fs42\fsmilli21333 \cb4 # Extract the certificate from the keystore 
+\b0\fs24 \cb1 \
+
+\b\fs42\fsmilli21333 \cb4 keytool -export -alias server -storetype JCEKS \\\
+-keystore \cf6 brokerKey.jck \cf5 \\ \
+-storepass \cf6 brokerStorPass \cf5 -file \cf6 broker.crt 
+\b0\fs24 \cf5 \cb1 \
+\pard\pardeftab720\sl480\partightenfactor0
+
+\b\fs42\fsmilli21333 \cf5 \cb4 # Place
+\b0\fs24 \cb1  
+\b\fs42\fsmilli21333 \cb4 the certificate in a trust store for the client\
+keytool -importcert -noprompt -alias broker -file \cf6 broker.crt \
+\cf5 \\-storetype JCEKS -keystore \cf6 clienttruststore.jck \cf5 \\\
+-storepass \cf6 clienttrustpassword \
+\
+\pard\pardeftab720\sl480\sa240\partightenfactor0
+\cf5 # Generate the key pair and place it in a keystore\cb1 \uc0\u8232 \cb4 keytool genkeypair -alias server -keyalg RSA -keysize 1024 -validity 365 \\ 
+\b0\fs24 \cb1 \
+
+\b\fs42\fsmilli21333 \cb4 -storetype JCEKS -keystore \cf6 brokerstore.jck \cf5 \\\cb1 \uc0\u8232 \cb4 -storepass \cf6 brokerpassword \cf5 \\\cb1 \uc0\u8232 \cb4 -dname "cn=broker, ou=cp130, o=UW, \\\
+l=Seattle, st=Washington, c=US" \
+\\ -keypass \cf6 brokerprivkeypassword 
+\b0\fs24 \cf5 \cb1 \
+
+\b\fs42\fsmilli21333 \cb4 # Extract the certificate from the keystore 
+\b0\fs24 \cb1 \
+
+\b\fs42\fsmilli21333 \cb4 keytool -export -alias server -storetype JCEKS \\\
+-keystore \cf6 serverstore.jck \cf5 \\ \
+-storepass \cf6 storepassword \cf5 -file \cf6 server.crt 
+\b0\fs24 \cf5 \cb1 \
+\pard\pardeftab720\sl480\partightenfactor0
+
+\b\fs42\fsmilli21333 \cf5 \cb4 # Place
+\b0\fs24 \cb1  
+\b\fs42\fsmilli21333 \cb4 the certificate in a trust store for the client\
+key tool -importcert -noprompt -alias broker -file \cf6 broker.crt \
+\cf5 \\-storetype JCEKS -keystore \cf6 clienttruststore.jck \cf5 \\\
+-storepass \cf6 clienttrustpassword \
+\
+\pard\pardeftab720\sl480\sa240\partightenfactor0
+\cf5 # Generate the key pair and place it in a keystore\cb1 \uc0\u8232 \cb4 keytool genkeypair -alias server -keyalg RSA -keysize 1024 -validity 365 \\ 
+\b0\fs24 \cb1 \
+
+\b\fs42\fsmilli21333 \cb4 -storetype JCEKS -keystore \cf6 brokerstore.jck \cf5 \\\cb1 \uc0\u8232 \cb4 -storepass \cf6 brokerpassword \cf5 \\\cb1 \uc0\u8232 \cb4 -dname "cn=broker, ou=cp130, o=UW, \\\
+l=Seattle, st=Washington, c=US" \
+\\ -keypass \cf6 brokerprivkeypassword 
+\b0\fs24 \cf5 \cb1 \
+
+\b\fs42\fsmilli21333 \cb4 # Extract the certificate from the keystore 
+\b0\fs24 \cb1 \
+
+\b\fs42\fsmilli21333 \cb4 keytool -export -alias server -storetype JCEKS \\\
+-keystore \cf6 serverstore.jck \cf5 \\ \
+-storepass \cf6 storepassword \cf5 -file \cf6 server.crt 
+\b0\fs24 \cf5 \cb1 \
+\pard\pardeftab720\sl480\partightenfactor0
+
+\b\fs42\fsmilli21333 \cf5 \cb4 # Place
+\b0\fs24 \cb1  
+\b\fs42\fsmilli21333 \cb4 the certificate in a trust store for the client\
+key tool -importcert -noprompt -alias broker -file \cf6 broker.crt \
+\cf5 \\-storetype JCEKS -keystore \cf6 clienttruststore.jck \cf5 \\\
+-storepass \cf6 clienttrustpassword \
+\
+\pard\pardeftab720\sl480\sa240\partightenfactor0
+\cf5 # Generate the key pair and place it in a keystore\cb1 \uc0\u8232 \cb4 keytool genkeypair -alias server -keyalg RSA -keysize 1024 -validity 365 \\ 
+\b0\fs24 \cb1 \
+
+\b\fs42\fsmilli21333 \cb4 -storetype JCEKS -keystore \cf6 brokerstore.jck \cf5 \\\cb1 \uc0\u8232 \cb4 -storepass \cf6 brokerpassword \cf5 \\\cb1 \uc0\u8232 \cb4 -dname "cn=broker, ou=cp130, o=UW, \\\
+l=Seattle, st=Washington, c=US" \
+\\ -keypass \cf6 brokerprivkeypassword 
+\b0\fs24 \cf5 \cb1 \
+
+\b\fs42\fsmilli21333 \cb4 # Extract the certificate from the keystore 
+\b0\fs24 \cb1 \
+
+\b\fs42\fsmilli21333 \cb4 keytool -export -alias server -storetype JCEKS \\\
+-keystore \cf6 serverstore.jck \cf5 \\ \
+-storepass \cf6 storepassword \cf5 -file \cf6 server.crt 
+\b0\fs24 \cf5 \cb1 \
+\pard\pardeftab720\sl480\partightenfactor0
+
+\b\fs42\fsmilli21333 \cf5 \cb4 # Place
+\b0\fs24 \cb1  
+\b\fs42\fsmilli21333 \cb4 the certificate in a trust store for the client\
+key tool -importcert -noprompt -alias broker -file \cf6 broker.crt \
+\cf5 \\-storetype JCEKS -keystore \cf6 clienttruststore.jck \cf5 \\\
+-storepass \cf6 clienttrustpassword }

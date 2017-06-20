@@ -117,7 +117,8 @@ public class ExchangeNetworkAdapter implements ExchangeAdapter {
 	public synchronized void priceChanged(ExchangeEvent event) {
 		final String symbol = event.getTicker();
 		final int price = event.getPrice();
-		final String msg = String.join(ELEMENT_DELIMITER, PRICE_CHANGE_EVENT, symbol, Integer.toString(price));
+		final String msg = String.join(ELEMENT_DELIMITER, PRICE_CHANGE_EVENT,
+				symbol, Integer.toString(price));
 		logger.info(msg);
 		try {
 			final byte[] buffer = msg.getBytes(ENCODING);

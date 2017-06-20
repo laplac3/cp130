@@ -194,14 +194,14 @@ public class ExchangeNetworkProxy implements StockExchange {
 			}
 			final InputStream ins = socket.getInputStream();
 			final Reader reader = new InputStreamReader(ins, ENCODING);
-			buffer = new BufferedReader(reader);
+			buffer = new BufferedReader(reader);  //good for reading lines
 			
 			final OutputStream outs = socket.getOutputStream();
 			final Writer writer = new OutputStreamWriter(outs, ENCODING);
-			pwriter = new PrintWriter(writer, true);
+			pwriter = new PrintWriter(writer, true); // the true auto flushes after adding context.
 			
 			pwriter.println(command);
-			response = buffer.readLine();
+			response = buffer.readLine();  // wait until receive a complete line
 			
 		} catch ( final IOException e ) {
 			logger.warn("Error in sending command", e);

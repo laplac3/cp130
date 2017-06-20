@@ -23,7 +23,7 @@ public class CommandListener implements Runnable {
 	 */
 	private static final Logger logger = LoggerFactory.getLogger(CommandListener.class);
 	/**
-	 * The command port.
+	 * The command port to listen on.
 	 */
 	private final int commandPort;
 	/**
@@ -35,7 +35,7 @@ public class CommandListener implements Runnable {
 	 */
 	private ServerSocket server;
 	/**
-	 * A boolean for listening. 
+	 * A boolean for listening.
 	 */
 	private volatile boolean listen = true;
 	/**
@@ -66,7 +66,8 @@ public class CommandListener implements Runnable {
 				try {
 					socket = server.accept();
 					if ( logger.isInfoEnabled() ) {
-						logger.info(String.format("Accepted connection %s:%d", socket.getLocalAddress(), socket.getLocalPort()));
+						logger.info(String.format("Accepted connection %s:%d",
+								socket.getLocalAddress(), socket.getLocalPort()));
 					}
 				} catch ( final SocketException e ) {
 					if ( server != null && !server.isClosed() ) {
