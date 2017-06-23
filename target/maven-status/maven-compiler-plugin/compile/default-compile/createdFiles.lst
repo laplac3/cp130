@@ -6,6 +6,7 @@ edu/uw/nan/account/AccountLaplace.class
 edu/uw/nan/exchange/ExchangeNetworkAdapter.class
 edu/uw/nan/dao/FileDaoFactory.class
 edu/uw/nan/exchange/NetEventProcessor$1.class
+edu/uw/nan/security/LaplaceClientOrderCodec$1.class
 edu/uw/nan/exchange/CommandHandler.class
 edu/uw/nan/exchange/ExchangeNetworkAdapterFactory.class
 edu/uw/nan/dao/JsonDaoFactory.class
@@ -15,6 +16,8 @@ edu/uw/nan/dao/SerUtil.class
 edu/uw/nan/account/AddressLaplace.class
 edu/uw/nan/dao/FileAccountDao.class
 edu/uw/nan/exchange/ExchangeNetworkProxyFactory.class
+edu/uw/nan/security/LaplaceClientOrderCodec.class
+edu/uw/nan/security/LaplaceClientOrderCodec$Tri.class
 edu/uw/nan/dao/JsonAccountDao.class
 edu/uw/nan/dao/AddressSer.class
 edu/uw/nan/broker/OrderManagerLaplace.class

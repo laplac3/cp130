@@ -5,6 +5,7 @@
 /Users/laplace/cs/cp130-5/src/main/java/edu/uw/nan/broker/OrderManagerLaplace.java
 /Users/laplace/cs/cp130-5/src/main/java/edu/uw/nan/exchange/ExchangeNetworkAdapter.java
 /Users/laplace/cs/cp130-5/src/main/java/edu/uw/nan/exchange/ExchangeNetworkProxy.java
+/Users/laplace/cs/cp130-5/src/main/java/edu/uw/nan/security/LaplaceClientOrderCodec.java
 /Users/laplace/cs/cp130-5/src/main/java/edu/uw/nan/account/CreditCardLaplace.java
 /Users/laplace/cs/cp130-5/src/main/java/edu/uw/nan/exchange/ExchangeNetworkAdapterFactory.java
 /Users/laplace/cs/cp130-5/src/main/java/edu/uw/nan/account/AccountManagerLaplace.java
